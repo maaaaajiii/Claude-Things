@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Macro Dashboard</title>
+<style>
+:root{
+  --bg:#f6f6f3; --card:#fff; --ink:#17171a; --muted:#6a6a72; --line:#e4e4de;
+  --good:#1a7f4b; --good-bg:#e8f5ed; --bad:#c02626; --bad-bg:#fdecec;
+  --warn:#9a6200; --warn-bg:#fdf3e0; --neutral:#5d5d66; --neutral-bg:#f0f0ee;
+  --accent:#b4530a;
+}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#131315; --card:#1c1c1f; --ink:#ececf0; --muted:#9b9ba4; --line:#2d2d32;
+    --good:#5fd398; --good-bg:#12291f; --bad:#ff7b7b; --bad-bg:#2c1618;
+    --warn:#f0b95c; --warn-bg:#2b2113; --neutral:#a0a0aa; --neutral-bg:#232327;
+    --accent:#e8834a;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 0 5rem;background:var(--bg);color:var(--ink);
+  font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1140px;margin:0 auto;padding:0 1.1rem}
+
+/* masthead */
+.top{background:linear-gradient(180deg,var(--card),transparent);
+  border-bottom:1px solid var(--line);padding:2.2rem 0 1.4rem;margin-bottom:0}
+h1{font-size:2rem;margin:0 0 .3rem;letter-spacing:-.03em;font-weight:700}
+.sub{color:var(--muted);font-size:.86rem;margin:0}
+
+/* sticky nav */
+nav{position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line);margin-bottom:2rem;
+  backdrop-filter:saturate(1.4) blur(8px)}
+nav .navin{max-width:1140px;margin:0 auto;padding:.55rem 1.1rem;
+  display:flex;gap:.15rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+nav .navin::-webkit-scrollbar{display:none}
+nav a{color:var(--muted);text-decoration:none;font-size:.79rem;font-weight:600;
+  padding:.35rem .6rem;border-radius:7px;white-space:nowrap}
+nav a:hover{color:var(--ink);background:var(--neutral-bg)}
+
+h2{font-size:1.22rem;margin:3.2rem 0 .3rem;letter-spacing:-.02em;scroll-margin-top:3.6rem;
+  font-weight:680}
+h2 .n{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:.55rem;
+  font-size:.82rem;font-weight:700;vertical-align:.18em;letter-spacing:.06em}
+.h2sub{color:var(--muted);font-size:.87rem;margin:0 0 1.1rem;max-width:74ch}
+
+/* section conclusion */
+.concl{border-radius:12px;padding:1rem 1.15rem;margin:1.3rem 0 .5rem;
+  border:1px solid var(--line);border-left-width:5px;background:var(--card)}
+.concl.good{border-left-color:var(--good);background:var(--good-bg)}
+.concl.bad{border-left-color:var(--bad);background:var(--bad-bg)}
+.concl.neutral{border-left-color:var(--muted)}
+.concl .ct{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;
+  font-weight:800;color:var(--muted);margin-bottom:.5rem}
+.concl .cb{font-size:.91rem}
+.concl .cb p{margin:.5rem 0}
+.concl .cb p:first-child{margin-top:0}
+.concl .cb p:last-child{margin-bottom:0}
+
+h3.h3{font-size:1rem;margin:1.8rem 0 .3rem;font-weight:660;letter-spacing:-.01em}
+
+/* sparkline */
+.spark{display:block;margin:.45rem 0 .1rem;width:100%;height:26px}
+
+/* verdict banner */
+.banner{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:1.4rem 1.5rem;margin-bottom:1.5rem}
+.banner .big{font-size:1.3rem;font-weight:650;letter-spacing:-.02em;margin:0 0 .6rem}
+.banner p{margin:.5rem 0;font-size:.94rem}
+.pillrow{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.pill{font-size:.78rem;padding:.3rem .7rem;border-radius:999px;font-weight:600;
+  border:1px solid transparent}
+.pill.good{background:var(--good-bg);color:var(--good);border-color:var(--good)}
+.pill.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.pill.warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+.pill.neutral{background:var(--neutral-bg);color:var(--neutral);border-color:var(--line)}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:.8rem}
+.tile{background:var(--card);border:1px solid var(--line);border-left-width:4px;
+  border-radius:11px;padding:.85rem .95rem}
+.tile.good{border-left-color:var(--good)} .tile.bad{border-left-color:var(--bad)}
+.tile.neutral{border-left-color:var(--line)} .tile.fail{border-left-color:var(--warn)}
+.tile .lbl{font-size:.76rem;color:var(--muted);font-weight:600;text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:.25rem;display:block}
+.tile .val{font-size:1.5rem;font-weight:640;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;line-height:1.15}
+.tile .chg{font-size:.84rem;font-weight:600;margin-top:.15rem;font-variant-numeric:tabular-nums}
+.tile .chg.up{color:var(--bad)} .tile .chg.dn{color:var(--good)}
+.tile .chg.flat{color:var(--muted)}
+.tile .chg.upg{color:var(--good)} .tile .chg.dnb{color:var(--bad)}
+.tile .w20{font-size:.76rem;color:var(--muted);margin-top:.3rem;
+  font-variant-numeric:tabular-nums}
+.tile .tag{font-size:.68rem;font-weight:700;padding:.05rem .35rem;border-radius:4px;
+  margin-left:.15rem;text-transform:uppercase;letter-spacing:.04em}
+.tag.good{background:var(--good-bg);color:var(--good)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.neutral{background:var(--neutral-bg);color:var(--neutral)}
+.legend{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:.7rem .95rem;font-size:.83rem;color:var(--muted);margin-bottom:1rem}
+.legend b{color:var(--ink)}
+.tile .asof{font-size:.72rem;color:var(--muted);margin-top:.45rem;
+  border-top:1px dashed var(--line);padding-top:.4rem}
+.tile .means{font-size:.8rem;color:var(--muted);margin-top:.5rem;line-height:1.45}
+.stale{color:var(--warn);font-weight:600}
+
+/* details / explainer */
+details{background:var(--card);border:1px solid var(--line);border-radius:11px;
+  margin:.6rem 0;overflow:hidden}
+summary{cursor:pointer;padding:.8rem 1rem;font-weight:600;font-size:.92rem;
+  list-style:none;display:flex;justify-content:space-between;gap:1rem;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-weight:400;font-size:1.2rem}
+details[open] summary::after{content:"−"}
+details[open] summary{border-bottom:1px solid var(--line)}
+.dbody{padding:.9rem 1rem 1.1rem;font-size:.9rem}
+.dbody p{margin:.55rem 0}
+.dbody ul{margin:.5rem 0;padding-left:1.15rem}
+.dbody li{margin:.3rem 0}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:460px}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* calendar */
+.cal{display:flex;flex-direction:column;gap:.5rem}
+.ev{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:.75rem .9rem;display:grid;grid-template-columns:auto 1fr;gap:.9rem}
+.ev .when{font-variant-numeric:tabular-nums;font-weight:640;font-size:.85rem;
+  white-space:nowrap;min-width:5.4rem}
+.ev .when small{display:block;font-weight:400;color:var(--muted);font-size:.74rem}
+.ev.high{border-left:4px solid var(--accent)}
+.ev .t{font-weight:640;font-size:.92rem}
+.ev .w{font-size:.84rem;color:var(--muted);margin-top:.25rem;line-height:1.5}
+.ev .cd{font-size:.72rem;color:var(--accent);font-weight:600}
+
+.note{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;
+  padding:.85rem 1rem;font-size:.86rem;margin:1rem 0;color:var(--ink)}
+.foot{margin-top:3.5rem;padding-top:1.2rem;border-top:1px solid var(--line);
+  color:var(--muted);font-size:.8rem}
+a{color:var(--accent)}
+code{background:var(--neutral-bg);padding:.1rem .35rem;border-radius:4px;font-size:.85em}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+<h1>Dashboard Makro → Aset Beresiko</h1>
+<p class="sub">Ditarik 2026-08-26 15:52 WIB · 39 seri otomatis dari FRED &amp; CoinGecko,
+sisanya riset manual bertanggal · setiap angka membawa tanggal cetakannya sendiri</p>
+</div></div>
+<nav><div class="navin">
+<a href="#s01">01 Yang berubah</a><a href="#s02">02 Paling penting</a>
+<a href="#s03">03 Obligasi</a><a href="#s04">04 Inflasi</a>
+<a href="#s05">05 Tenaga kerja</a><a href="#s06">06 Likuiditas</a>
+<a href="#s07">07 Selera risiko</a><a href="#s08">08 Fed</a>
+<a href="#s09">09 Kalender</a><a href="#s10">10 Aturan</a>
+</div></nav>
+<div class="wrap">
+<div class="banner">
+<p class="big">Rezim pasar sekarang</p>
+<p><strong>Penggerak:</strong> Saham dan yield bergerak BERLAWANAN. Pasar sedang dikendarai discount rate: tiap kenaikan yield langsung menekan aset beresiko. Ini rezim inflasi. <span style='color:var(--muted)'>(korelasi saham vs yield 10y, 20 hari: -0,46)</span></p>
+<p><strong>Ketenagakerjaan:</strong> Sahm Rule di -0.03, masih jauh di bawah ambang resesi 0,50. Artinya kita di rezim GOOD NEWS IS BAD NEWS: data tenaga kerja yang kuat berarti Fed tidak perlu melunak, dan itu jelek untuk aset beresiko. Data tenaga kerja yang lemah justru dibaca positif.</p>
+<p><strong>Selera risiko:</strong> Spread kredit high-yield sempit dan tidak melebar. Selera risiko masih hidup. Ini pengukur paling jujur yang ada, lebih dari indeks saham itu sendiri.</p>
+<div class="pillrow"><span class="pill neutral">Kurva: Twist steepener</span><span class="pill good">HY OAS 2,69%</span><span class="pill good">Sahm -0,03 / ambang 0,50</span><span class="pill neutral">Net liquidity $5,792 T</span></div>
+</div>
+<h2 id="s01"><span class="n">01</span>Yang berubah sejak refresh terakhir</h2>
+<p class="h2sub">Tidak ada satu pun seri yang menerbitkan cetakan baru sejak refresh terakhir. Semua angka di bawah sama persis dengan sebelumnya, dan itu memang benar, bukan bug.</p>
+<h2 id="s02"><span class="n">02</span>Yang paling penting</h2>
+<p class="h2sub">Warna = artinya untuk aset beresiko, bukan sekadar naik atau turun. Hijau ramah, merah menekan.</p>
+<div class="legend">Tiap kotak punya <b>dua</b> angka perubahan, dan wajar kalau keduanya berbeda arah:<br><b>1 · Panah besar</b> = perubahan dari <b>cetakan resmi sebelumnya</b>. Kalau lembaga resminya belum merilis apa-apa, angka ini tidak bergerak sama sekali, dan itu memang benar.<br><b>2 · Tren 20 hari</b> = arah jangka menengah. <b>Ini yang menentukan warna garis kiri</b>, supaya warnanya tidak berkedip-kedip cuma karena satu hari yang berisik.<br>Jadi garis hijau di sebelah panah merah artinya: turun selama sebulan terakhir, tapi naik di cetakan paling akhir.</div>
+<div class="tiles">
+<div class="tile neutral">
+<span class="lbl">Suku bunga Fed (batas atas)</span>
+<div class="val">3,75%</div>
+<div class="chg flat">= tidak berubah dari cetakan sebelumnya</div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,24.0 1.8,24.0 3.5,24.0 5.3,24.0 7.1,24.0 8.8,24.0 10.6,24.0 12.3,24.0 14.1,24.0 15.9,24.0 17.6,24.0 19.4,24.0 21.2,24.0 22.9,24.0 24.7,24.0 26.4,24.0 28.2,24.0 30.0,24.0 31.7,24.0 33.5,24.0 35.3,24.0 37.0,24.0 38.8,24.0 40.5,24.0 42.3,24.0 44.1,24.0 45.8,24.0 47.6,24.0 49.4,24.0 51.1,24.0 52.9,24.0 54.6,24.0 56.4,24.0 58.2,24.0 59.9,24.0 61.7,24.0 63.5,24.0 65.2,24.0 67.0,24.0 68.7,24.0 70.5,24.0 72.3,24.0 74.0,24.0 75.8,24.0 77.6,24.0 79.3,24.0 81.1,24.0 82.8,24.0 84.6,24.0 86.4,24.0 88.1,24.0 89.9,24.0 91.7,24.0 93.4,24.0 95.2,24.0 96.9,24.0 98.7,24.0 100.5,24.0 102.2,24.0 104.0,24.0" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="24.0" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: datar <span class="tag neutral">netral</span></div>
+<div class="asof">per 2026-08-25 · 1 hari lalu<br><span style='opacity:.75'>harian · target FOMC</span></div>
+<div class="means">Harga uang paling dasar. Semua yield lain digantung dari sini.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Yield 2 tahun</span>
+<div class="val">4,24%</div>
+<div class="chg flat">= tidak berubah dari cetakan sebelumnya</div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,24.0 1.8,20.1 3.5,20.1 5.3,18.4 7.1,20.1 8.8,13.3 10.6,14.4 12.3,15.5 14.1,15.5 15.9,20.1 17.6,17.8 19.4,18.9 21.2,20.1 22.9,11.6 24.7,12.2 26.4,9.3 28.2,13.8 30.0,16.7 31.7,17.8 33.5,18.9 35.3,17.2 37.0,15.0 38.8,13.3 40.5,15.0 42.3,15.5 44.1,12.2 45.8,11.0 47.6,13.8 49.4,11.0 51.1,8.2 52.9,12.7 54.6,15.5 56.4,13.8 58.2,12.7 59.9,11.0 61.7,8.2 63.5,5.4 65.2,2.0 67.0,4.3 68.7,5.4 70.5,8.2 72.3,10.5 74.0,9.9 75.8,7.1 77.6,8.8 79.3,11.6 81.1,12.7 82.8,8.8 84.6,12.2 86.4,8.8 88.1,10.5 89.9,11.6 91.7,14.4 93.4,13.3 95.2,12.2 96.9,12.2 98.7,12.2 100.5,12.2 102.2,9.3 104.0,9.3" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="9.3" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▼ -0,07% <span class="tag good">ramah</span></div>
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian · lag ~2 hari</span></div>
+<div class="means">Cerminan ekspektasi kebijakan Fed 1-2 tahun ke depan. Kalau ini naik, pasar sedang menghargai kenaikan bunga.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Yield 10 tahun</span>
+<div class="val">4,70%</div>
+<div class="chg dn">▼ -0,04% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 3 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,19.8 1.8,18.6 3.5,19.2 5.3,17.5 7.1,18.6 8.8,13.9 10.6,13.3 12.3,15.1 14.1,13.9 15.9,19.8 17.6,18.1 19.4,18.6 21.2,21.0 22.9,17.5 24.7,19.2 26.4,16.3 28.2,16.9 30.0,22.2 31.7,22.8 33.5,24.0 35.3,24.0 37.0,20.4 38.8,18.1 40.5,17.5 42.3,18.1 44.1,13.9 45.8,13.3 47.6,14.5 49.4,13.3 51.1,9.7 52.9,12.1 54.6,13.9 56.4,12.7 58.2,13.9 59.9,10.9 61.7,9.1 63.5,6.8 65.2,4.4 67.0,5.6 68.7,7.9 70.5,10.3 72.3,6.8 74.0,6.2 75.8,2.0 77.6,5.0 79.3,9.1 81.1,9.1 82.8,5.6 84.6,7.9 86.4,3.8 88.1,5.0 89.9,6.2 91.7,9.1 93.4,6.2 95.2,3.8 96.9,4.4 98.7,7.9 100.5,5.6 102.2,2.6 104.0,5.0" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="5.0" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▲ +0,05% <span class="tag bad">menekan</span></div>
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian · lag ~2 hari</span></div>
+<div class="means">Benchmark global. Campuran pertumbuhan, inflasi, dan premi jangka. Perlu dipecah dulu sebelum dinilai, lihat bagian 03.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Yield 30 tahun</span>
+<div class="val">5,23%</div>
+<div class="chg dn">▼ -0,04% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 3 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,17.6 1.8,17.6 3.5,18.6 5.3,17.6 7.1,18.6 8.8,16.7 10.6,15.7 12.3,16.7 14.1,15.7 15.9,19.6 17.6,18.6 19.4,18.6 21.2,20.6 22.9,20.6 24.7,22.0 26.4,19.6 28.2,20.1 30.0,24.0 31.7,24.0 33.5,23.5 35.3,24.0 37.0,21.6 38.8,18.6 40.5,18.1 42.3,17.6 44.1,14.7 45.8,14.2 47.6,14.7 49.4,14.2 51.1,12.3 52.9,13.2 54.6,13.2 56.4,12.8 58.2,14.2 59.9,11.8 61.7,10.8 63.5,9.8 65.2,8.8 67.0,9.3 68.7,11.3 70.5,12.8 72.3,7.4 74.0,6.9 75.8,4.0 77.6,5.9 79.3,8.4 81.1,8.8 82.8,6.4 84.6,7.9 86.4,4.9 88.1,5.4 89.9,5.4 91.7,6.9 93.4,4.9 95.2,2.0 96.9,3.5 98.7,7.9 100.5,5.9 102.2,4.0 104.0,5.9" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="5.9" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▲ +0,11% <span class="tag bad">menekan</span></div>
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian · lag ~2 hari</span></div>
+<div class="means">Paling sedikit soal Fed, paling banyak soal kepercayaan fiskal dan banjir penerbitan utang.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Yield RIIL 10 tahun</span>
+<div class="val">2,38%</div>
+<div class="chg dn">▼ -0,02% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 3 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,24.0 1.8,24.0 3.5,24.0 5.3,21.8 7.1,21.8 8.8,17.4 10.6,16.3 12.3,16.8 14.1,16.3 15.9,19.0 17.6,18.5 19.4,19.6 21.2,20.1 22.9,15.2 24.7,16.3 26.4,12.5 28.2,11.9 30.0,15.2 31.7,17.4 33.5,17.9 35.3,19.0 37.0,16.8 38.8,14.1 40.5,13.6 42.3,14.6 44.1,11.4 45.8,10.8 47.6,10.8 49.4,10.3 51.1,8.1 52.9,9.7 54.6,10.3 56.4,8.6 58.2,10.8 59.9,8.6 61.7,7.5 63.5,6.4 65.2,4.2 67.0,4.2 68.7,3.7 70.5,5.3 72.3,5.3 74.0,5.3 75.8,2.0 77.6,4.2 79.3,5.9 81.1,5.3 82.8,4.2 84.6,5.9 86.4,4.2 88.1,4.2 89.9,4.8 91.7,6.4 93.4,5.3 95.2,3.7 96.9,5.3 98.7,8.6 100.5,8.6 102.2,5.9 104.0,7.0" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="7.0" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▼ -0,06% <span class="tag good">ramah</span></div>
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian · lag ~2 hari</span></div>
+<div class="means">Yield nominal dikurangi ekspektasi inflasi. INI angka paling penting di seluruh halaman untuk crypto dan emas. Naik = uang benar-benar jadi mahal.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Term premium 10 tahun</span>
+<div class="val">0,87%</div>
+<div class="chg up">▲ +0,02% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 1 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,14.1 1.8,15.2 3.5,14.2 5.3,14.7 7.1,13.0 8.8,13.9 10.6,9.7 12.3,9.0 14.1,10.2 15.9,9.8 17.6,14.2 19.4,13.7 21.2,14.8 22.9,16.9 24.7,13.8 26.4,15.5 28.2,14.0 30.0,14.9 31.7,19.4 33.5,21.6 35.3,23.2 37.0,24.0 38.8,21.9 40.5,19.0 42.3,17.7 44.1,18.5 45.8,15.3 47.6,13.3 49.4,13.7 51.1,12.4 52.9,9.8 54.6,11.1 56.4,13.1 58.2,12.2 59.9,12.4 61.7,10.7 63.5,8.5 65.2,6.3 67.0,4.2 68.7,5.5 70.5,7.5 72.3,9.9 74.0,7.8 75.8,6.1 77.6,2.0 79.3,3.7 81.1,7.4 82.8,8.4 84.6,5.7 86.4,6.9 88.1,4.2 89.9,4.4 91.7,4.8 93.4,7.2 95.2,5.3 96.9,3.7 98.7,3.5 100.5,5.5 102.2,4.4 104.0,2.0" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="2.0" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▲ +0,03% <span class="tag bad">menekan</span></div>
+<div class="asof">per 2026-08-21 · 5 hari lalu<br><span style='opacity:.75'>harian · lag ~10 hari</span></div>
+<div class="means">Bagian yield yang bukan soal Fed. Ini kompensasi risiko memegang utang panjang. Naiknya angka ini yang bikin kenaikan yield jadi beracun, bukan sehat.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Core CPI (YoY)</span>
+<div class="val">2,47%</div>
+<div class="chg dn">▼ -0,10% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,2.0 3.6,3.5 7.2,2.7 10.8,5.7 14.3,9.3 17.9,11.4 21.5,11.9 25.1,11.1 28.7,11.1 32.3,10.8 35.9,11.0 39.4,12.2 43.0,11.1 46.6,13.4 50.2,18.6 53.8,19.1 57.4,19.3 61.0,17.0 64.6,14.7 68.1,13.8 71.7,15.3 75.3,21.9 78.9,21.2 82.5,23.3 86.1,23.9 89.7,21.9 93.2,19.6 96.8,18.4 100.4,22.4 104.0,24.0" fill="none" stroke="var(--good)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="24.0" r="2.1" fill="var(--good)"/></svg>
+<div class="w20">tren 20 hari: ▼ -0,83% <span class="tag good">ramah</span></div>
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan · rilis ~tgl 11</span></div>
+<div class="means">Inflasi tanpa energi dan pangan. Ini yang direaksi Fed, karena suku bunga tidak bisa memproduksi minyak.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Core PCE (YoY)</span>
+<div class="val">3,29%</div>
+<div class="chg dn">▼ -0,14% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 31 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,9.2 3.6,11.9 7.2,10.2 10.8,13.3 14.3,19.7 17.9,20.2 21.5,18.8 25.1,17.0 28.7,17.9 32.3,13.9 35.9,14.0 39.4,13.8 43.0,19.5 46.6,14.4 50.2,22.5 53.8,24.0 57.4,19.4 61.0,18.7 64.6,17.2 68.1,15.9 71.7,18.3 75.3,20.2 78.9,18.2 82.5,14.3 86.1,10.6 89.7,12.2 93.2,6.6 96.8,4.9 100.4,2.0 104.0,5.7" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="5.7" r="2.1" fill="var(--bad)"/></svg>
+<div class="w20">tren 20 hari: ▲ +0,30% <span class="tag bad">menekan</span></div>
+<div class="asof">data bulan Juni 2026<br><span style='opacity:.75'>bulanan · rilis akhir bulan</span></div>
+<div class="means">Target RESMI Fed, bukan CPI. Kalau ini dan core CPI berbeda arah, yang menang PCE.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Minyak WTI</span>
+<div class="val">86,48</div>
+<div class="chg up">▲ +0,44 <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 1 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,2.0 1.8,3.9 3.5,7.7 5.3,7.5 7.1,8.6 8.8,5.1 10.6,4.1 12.3,2.4 14.1,4.5 15.9,6.3 17.6,5.8 19.4,8.0 21.2,6.8 22.9,8.3 24.7,10.4 26.4,13.2 28.2,16.7 30.0,16.1 31.7,16.3 33.5,17.3 35.3,20.4 37.0,22.7 38.8,21.8 40.5,23.5 42.3,22.4 44.1,23.3 45.8,23.9 47.6,23.9 49.4,24.0 51.1,22.6 52.9,20.5 54.6,21.5 56.4,22.0 58.2,17.1 59.9,16.2 61.7,16.0 63.5,16.5 65.2,14.1 67.0,13.4 68.7,12.2 70.5,11.1 72.3,7.2 74.0,8.2 75.8,13.5 77.6,15.9 79.3,12.2 81.1,12.9 82.8,12.2 84.6,15.2 86.4,18.5 88.1,18.9 89.9,17.4 91.7,16.7 93.4,13.9 95.2,13.1 96.9,13.0 98.7,14.6 100.5,13.7 102.2,12.2 104.0,11.9" fill="none" stroke="var(--good)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="11.9" r="2.1" fill="var(--good)"/></svg>
+<div class="w20">tren 20 hari: ▲ +0,44 <span class="tag bad">menekan</span></div>
+<div class="asof">per 2026-08-18 · 8 hari lalu<br><span style='opacity:.75'>harian · lag ~1 minggu</span></div>
+<div class="means">Guncangan pasokan itu stagflasioner: inflasi naik sekaligus pertumbuhan turun, jadi obligasi dan saham kena bareng. FRED tertinggal seminggu, jangan dipercaya di hari keputusan.</div>
+</div>
+<div class="tile good">
+<span class="lbl">GDP riil (QoQ tahunan)</span>
+<div class="val">1,5%</div>
+<div class="chg dn">▼ -0,6% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 90 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,17.8 11.6,5.5 23.1,6.8 34.7,13.0 46.2,24.0 57.8,4.6 69.3,2.0 80.9,19.2 92.4,12.1 104.0,14.8" fill="none" stroke="var(--bad)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="14.8" r="2.1" fill="var(--bad)"/></svg>
+
+<div class="asof">data kuartal Q2 2026<br><span style='opacity:.75'>kuartalan · paling lambat</span></div>
+<div class="means">Paling terlambat dari semua data di sini. Berguna sebagai konfirmasi, bukan sinyal.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Indeks dolar (broad Fed)</span>
+<div class="val">118,06</div>
+<div class="chg dn">▼ -0,19 <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 1 hari</span></div>
+<svg class="spark" viewBox="0 0 104 26" width="104" height="26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,17.6 1.8,18.6 3.5,16.8 5.3,17.6 7.1,15.3 8.8,15.5 10.6,10.7 12.3,11.1 14.1,11.5 15.9,11.8 17.6,10.5 19.4,14.5 21.2,15.8 22.9,16.2 24.7,15.3 26.4,8.7 28.2,7.7 30.0,4.3 31.7,2.0 33.5,4.3 35.3,5.5 37.0,5.0 38.8,5.2 40.5,3.8 42.3,6.7 44.1,5.8 45.8,5.9 47.6,3.8 49.4,6.3 51.1,8.0 52.9,6.4 54.6,8.2 56.4,9.2 58.2,9.1 59.9,7.8 61.7,7.7 63.5,7.5 65.2,7.5 67.0,5.3 68.7,6.6 70.5,6.2 72.3,7.2 74.0,6.1 75.8,13.4 77.6,13.2 79.3,13.3 81.1,13.9 82.8,15.3 84.6,14.5 86.4,17.4 88.1,17.1 89.9,16.7 91.7,17.1 93.4,16.6 95.2,18.5 96.9,19.1 98.7,18.0 100.5,22.2 102.2,22.7 104.0,24.0" fill="none" stroke="var(--good)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><circle cx="104.0" cy="24.0" r="2.1" fill="var(--good)"/></svg>
+<div class="w20">tren 20 hari: ▼ -2,65 <span class="tag good">ramah</span></div>
+<div class="asof">per 2026-08-21 · 5 hari lalu<br><span style='opacity:.75'>harian · lag ~3 hari</span></div>
+<div class="means">Bukan DXY. Ini indeks dolar versi Fed, bobotnya lebih luas. Dolar kuat = kondisi keuangan global mengetat = jelek untuk crypto dan emerging market.</div>
+</div>
+<div class="tile neutral">
+<span class="lbl">USDT dominance</span>
+<div class="val">6.87%</div>
+<div class="chg flat">real-time, tanpa cetakan sebelumnya</div>
+
+
+<div class="asof">per 2026-08-26 · hari ini<br><span style='opacity:.75'>real-time · CoinGecko</span></div>
+<div class="means">Porsi uang crypto yang parkir di stablecoin. Naik = orang keluar dari risiko tapi belum keluar dari crypto. Turun = uang itu dibelanjakan ke aset beresiko.</div>
+</div>
+<div class="tile neutral">
+<span class="lbl">Bitcoin</span>
+<div class="val">$78,905</div>
+<div class="chg dnb">▼ -1.22% <span style="font-weight:400;color:var(--muted)">24 jam</span></div>
+
+
+<div class="asof">per 2026-08-26 · hari ini<br><span style='opacity:.75'>real-time · CoinGecko</span></div>
+<div class="means">Sisi aset. Ada di sini supaya bacaan makro di atas bisa dinilai benar atau salah belakangan, bukan cuma jadi cerita.</div>
+</div>
+</div>
+<div class="concl neutral"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Yang menekan:</strong> minyak naik, net liquidity turun.<br><strong>Yang mendukung:</strong> yield riil turun 6 bps sebulan, spread kredit sempit dan stabil, dolar melemah.</p><p>Karena pasar sedang dikendarai <strong>discount rate</strong>, bobot terbesar ada di baris yield riil dan term premium. Kabar ekonomi yang bagus tidak akan menolong selama dua angka itu naik, dan itulah sebabnya berita positif kadang tetap diikuti pasar turun.</p><p><strong>Bacaan keseluruhan:</strong> campuran, tidak ada arah dominan. Di kondisi begini, pergerakan besar biasanya datang dari posisi pasar yang terlalu satu sisi, bukan dari makro. Lihat bagian 07.</p></div></div>
+<h2 id="s03"><span class="n">03</span>Obligasi, yield, dan premi</h2>
+<p class="h2sub">Bagian ini menjawab satu pertanyaan: kenaikan yield yang sedang terjadi itu jenis yang sehat atau yang beracun? Jawabannya ada di kotak tepat di bawah ini, bukan disuruh cari sendiri.</p>
+<div class="concl bad"><div class="ct">Jawabannya: searah atau berlawanan?</div><div class="cb"><p><strong>Saham dan yield sekarang bergerak <strong>BERLAWANAN.</strong> Jadi jawabannya: pasar sedang dikendarai <strong>discount rate</strong>, bukan pertumbuhan. Tiap kenaikan yield langsung menekan saham dan crypto. Ini rezim inflasi, dan di rezim ini tidak ada versi 'yield naik yang bagus'.</strong> Angkanya: korelasi -0,46 antara perubahan harian S&amp;P 500 dan perubahan harian yield 10 tahun, diukur pada 20 hari terakhir. Skalanya -1 sampai +1: di bawah -0,20 disebut berlawanan, di atas +0,20 disebut searah.</p><p><strong>Jenis pergerakannya.</strong> Dalam 20 hari terakhir: 2 tahun -7 bps, 10 tahun +5 bps, 30 tahun +11 bps. Ujung pendek <strong>turun</strong> sementara ujung panjang <strong>naik</strong>. Artinya pasar sebenarnya sedang melunak soal Fed jangka dekat, tapi justru minta bayaran lebih mahal untuk memegang utang jangka panjang. Kenaikan yield yang terjadi sekarang datang dari sisi <strong>harga risiko</strong>, bukan dari jalur suku bunga.</p><p><strong>Konfirmasi dari term premium.</strong> Term premium 10 tahun ada di 0,87% dan datar 0,03 poin dalam 20 hari. Term premium yang tidak naik berarti kenaikan yield (kalau ada) lebih banyak soal jalur suku bunga daripada soal ketakutan fiskal.</p><p><strong>Tapi ada penyeimbangnya.</strong> Spread kredit high-yield masih sempit, artinya pasar kredit belum ikut takut. Selama itu bertahan, tekanan dari sisi obligasi belum berubah jadi krisis. Kalau spread ini mulai melebar bersamaan dengan yield panjang yang naik, barulah situasinya berubah serius.</p></div></div>
+<details open><summary>Bentuk kurva sekarang</summary><div class="dbody">
+<p><strong>Twist steepener.</strong> Dua ujung bergerak ke arah BERLAWANAN, jadi ini bukan bull maupun bear, tapi puntiran (spread melebar, ujung panjang relatif naik terhadap ujung pendek). Ujung pendek turun sementara ujung panjang naik: pasar melunak soal Fed jangka dekat tapi justru minta kompensasi lebih besar untuk risiko jangka panjang. Campuran sinyal, jangan dipaksa jadi satu cerita. 2 tahun -7 bps, 10 tahun +5 bps, 30 tahun +11 bps dalam 20 hari terakhir.</p>
+<div class="scroll"><table><tr><th>Spread</th><th class="num">Sekarang</th><th>Artinya</th></tr>
+<tr><td>2y → 10y</td><td class="num">+46 bps</td><td>Ukuran kemiringan klasik. Negatif = inverted, historis sinyal resesi.</td></tr>
+<tr><td>5y → 30y</td><td class="num">+82 bps</td><td>Fokus ke ujung panjang. Melebar biasanya cerita fiskal/premi jangka.</td></tr>
+<tr><td>3bln → 10y</td><td class="num">+83 bps</td><td>Versi yang paling dipercaya periset Fed sebagai indikator resesi.</td></tr>
+</table></div>
+<p style="margin-top:1rem"><strong>Ujung mana yang sebenarnya bergerak</strong> (perubahan 20 hari terakhir):</p>
+<div class="scroll"><table><tr><th>Tenor</th><th class="num">Perubahan 20 hari</th></tr>
+<tr><td>2 tahun</td><td class="num">-7 bps</td></tr>
+<tr><td>10 tahun</td><td class="num">+5 bps</td></tr>
+<tr><td>30 tahun</td><td class="num">+11 bps</td></tr>
+</table></div>
+<p style="color:var(--muted);font-size:.85rem">Ini tabel terpenting di bagian ini. Kalau CPI keluar panas, yang meledak duluan 2 tahun. Kalau lelang Treasury 30 tahun sepi peminat, yang meledak 30 tahun sementara 2 tahun diam. Berita utamanya sama-sama "yield naik", artinya untuk portofoliomu jauh berbeda.</p>
+<p style="color:var(--muted);font-size:.85rem">Kamus: <em>bull</em> = level yield turun, <em>bear</em> = level naik. <em>Steepener</em> = spread melebar, <em>flattener</em> = menyempit. <em>Twist</em> = dua ujung bergerak berlawanan, jadi tidak bisa disebut bull maupun bear.</p>
+<ul><li><strong>Bull steepener</strong> · ujung pendek turun lebih cepat. Pemotongan bunga sedang dihargai. Awalnya risk-on, tapi sering juga sinyal resesi mendekat.</li><li><strong>Bear steepener</strong> · ujung panjang naik. Premi jangka dan fiskal. Jelek.</li><li><strong>Bear flattener</strong> · ujung pendek naik. Kenaikan bunga sedang dihargai. Jelek untuk growth dan crypto.</li><li><strong>Bull flattener</strong> · ujung panjang turun. Campuran, sering karena ekspektasi pertumbuhan melemah.</li></ul>
+</div></details>
+<details><summary>Pecah yield 10 tahun: sehat atau beracun?</summary><div class="dbody">
+<p>Yield nominal itu penjumlahan. Kalau tidak dipecah, kamu tidak bisa tahu kenaikannya jenis apa:</p>
+<div class="scroll"><table><tr><th>Komponen</th><th class="num">Nilai</th><th class="num">Per tanggal</th><th>Kalau naik</th></tr>
+<tr><td>Yield nominal 10y</td><td class="num">4,70%</td><td class="num">2026-08-24</td><td>hasil penjumlahan di bawah</td></tr>
+<tr><td>→ Yield riil (TIPS)</td><td class="num">2,38%</td><td class="num">2026-08-24</td><td>Uang jadi mahal. Menekan semua aset beresiko, paling keras ke crypto.</td></tr>
+<tr><td>→ Ekspektasi inflasi (breakeven)</td><td class="num">2,32%</td><td class="num">2026-08-25</td><td>Pasar mulai tidak percaya inflasi terkendali. Kalau tembus 3%, seluruh kalkulasi Fed berubah.</td></tr>
+<tr><td>→ Term premium</td><td class="num">0,87%</td><td class="num">2026-08-21</td><td>Murni harga risiko: defisit, penerbitan utang, kredibilitas fiskal. Ini yang paling beracun.</td></tr>
+</table></div>
+<p><strong>Contoh nyata dari vault ini, 17 Agustus 2026:</strong> yield 30 tahun menembus 5,31%, tertinggi sejak 2007, <em>padahal peluang hike September datar di sekitar 30%</em>. Jadi penyebabnya bukan jalur suku bunga sama sekali, tapi penerbitan utang besar-besaran, defisit, tarif, dan biaya energi dari kebuntuan Hormuz. Itu tipe kenaikan yield paling beracun untuk aset beresiko, karena bukan cerita pertumbuhan, murni harga risiko.</p>
+<p><strong>Kebalikannya:</strong> yield naik karena pertumbuhan kuat justru bisa dibarengi saham naik dan spread kredit menyempit. Itu rezim <em>good news is good news</em>. Tes cepatnya cuma satu pertanyaan: <strong>hari ini saham dan yield searah atau berlawanan?</strong> Searah = pasar sedang dikendarai pertumbuhan. Berlawanan = dikendarai discount rate.</p>
+</div></details>
+<details><summary>Apa yang menggerakkan tiap tenor</summary><div class="dbody">
+<div class="scroll"><table><tr><th>Tenor</th><th class="num">Sekarang</th><th>Digerakkan terutama oleh</th></tr>
+<tr><td><strong>T-Bill 3 bulan</strong></td><td class="num">3,87%</td><td>Hampir murni suku bunga Fed saat ini. Nyaris tidak punya opini sendiri, dia mengikuti.</td></tr>
+<tr><td><strong>2 tahun</strong></td><td class="num">4,24%</td><td>Ekspektasi Fed 1-2 tahun ke depan. Paling reaktif ke data inflasi, data tenaga kerja, dan omongan pejabat Fed.</td></tr>
+<tr><td><strong>5 tahun</strong></td><td class="num">4,41%</td><td>Titik paling sensitif ke perubahan jalur kebijakan jangka menengah.</td></tr>
+<tr><td><strong>10 tahun</strong></td><td class="num">4,70%</td><td>Campuran pertumbuhan + inflasi + premi jangka. Benchmark yang dipakai menghargai hampir semua aset.</td></tr>
+<tr><td><strong>30 tahun</strong></td><td class="num">5,23%</td><td>Paling sedikit soal Fed. Didorong defisit, ukuran lelang, hasil lelang, dan kredibilitas fiskal jangka panjang.</td></tr>
+</table></div>
+<p>Jadi kalau CPI keluar panas: yang meledak duluan 2 tahun. Kalau lelang Treasury 30 tahun sepi peminat: yang meledak 30 tahun sementara 2 tahun diam. Dua kejadian itu punya arti yang sangat berbeda untuk portofoliomu, walaupun berita utamanya sama-sama 'yield naik'.</p>
+</div></details>
+<h2 id="s04"><span class="n">04</span>Inflasi</h2>
+<p class="h2sub">Current di kiri, dan perkiraan arah berikutnya di kanan.</p>
+<div class="tiles">
+<div class="tile good">
+<span class="lbl">Headline CPI (YoY)</span>
+<div class="val">3.30%</div>
+<div class="chg dn">▼ -0,16pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Termasuk energi dan pangan. Berisik. Ini yang dikutip media.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Core CPI (YoY)</span>
+<div class="val">2.47%</div>
+<div class="chg dn">▼ -0,10pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Tanpa energi dan pangan. Ini yang direaksi Fed.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Headline PCE (YoY)</span>
+<div class="val">3.67%</div>
+<div class="chg dn">▼ -0,41pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juni 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Versi BEA. Bobot beda dari CPI dan memperbolehkan substitusi.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Core PCE (YoY)</span>
+<div class="val">3.29%</div>
+<div class="chg dn">▼ -0,14pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juni 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">TARGET RESMI Fed. Kalau bertentangan dengan core CPI, ini yang menang.</div>
+</div>
+</div>
+<div class="note"><strong>Ketegangan yang belum selesai: core PCE 3.29% vs core CPI 2.47%, selisih +0.82 poin.</strong> Kalau kamu baca CPI, Fed terlihat hampir menang melawan inflasi. Kalau kamu baca PCE, inflasi masih jauh di atas target dan argumen kenaikan bunga jauh lebih hidup. PCE yang jadi target resmi. Ini gap terbesar yang belum terselesaikan di vault ini.</div>
+<h3 class="h3">Apa yang sebenarnya mendorong angka itu</h3>
+<p class="h2sub">CPI bukan satu angka, dia keranjang belanja. Ini isi keranjangnya, diurutkan dari yang paling menekan ke atas. Kolom terakhir memberi tahu komponen itu sedang memanas atau mendingin selama 3 bulan terakhir.</p>
+<div class="scroll"><table><tr><th>Komponen</th><th class="num">YoY</th><th class="num">Tren 3 bulan</th><th>Perannya</th></tr>
+<tr><td><strong>Energi</strong></td><td class="num">+14,45%</td><td class="num"><span class="tag good">mendingin</span></td><td>Paling liar, bisa naik-turun puluhan persen. Ini yang bikin headline beda jauh dari core. Fed sengaja mengabaikannya karena suku bunga tidak bisa menambah pasokan minyak.</td></tr>
+<tr><td><strong>Sewa/tempat tinggal</strong></td><td class="num">+3,16%</td><td class="num"><span class="tag neutral">datar</span></td><td>Bobotnya paling besar di keranjang dan paling lambat bergerak. Kalau ini masih tinggi, core tidak bisa turun cepat walaupun minyak jatuh.</td></tr>
+<tr><td><strong>Jasa (di luar energi)</strong></td><td class="num">+3,00%</td><td class="num"><span class="tag good">mendingin</span></td><td>Bagian paling lengket, digerakkan upah. Ini yang benar-benar dipelototi pejabat Fed, sering disebut supercore.</td></tr>
+<tr><td><strong>Pangan</strong></td><td class="num">+2,94%</td><td class="num"><span class="tag good">mendingin</span></td><td>Ikut guncangan cuaca dan komoditas. Terasa banget di dompet, tapi bukan yang dipakai Fed mengambil keputusan.</td></tr>
+<tr><td><strong>Kesehatan</strong></td><td class="num">+1,70%</td><td class="num"><span class="tag good">mendingin</span></td><td>Bergerak lambat, bobotnya jauh lebih besar di PCE daripada di CPI. Ini salah satu sebab kenapa dua ukuran itu bisa berbeda.</td></tr>
+<tr><td><strong>Barang inti</strong></td><td class="num">+0,78%</td><td class="num"><span class="tag good">mendingin</span></td><td>Barang non-pangan non-energi. Biasanya yang pertama selesai berinflasi setelah rantai pasok normal.</td></tr>
+</table></div>
+<div class="concl bad"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Kenapa headline dan core berbeda.</strong> Headline CPI 3,30%, core 2,47%, selisih +0,84 poin. Selisih itu hampir seluruhnya energi, yang sedang berjalan +14,4% dibanding setahun lalu. Ini pola khas guncangan pasokan energi yang <strong>belum</strong> merembes ke harga-harga lain. Dan itu penting, karena Fed bereaksi ke core, bukan headline: suku bunga tidak bisa memproduksi minyak.</p><p><strong>Di dalam core, dua mesinnya berlawanan.</strong> Barang inti cuma +0,78% sementara jasa +3,00%. Barang sudah selesai berinflasi; yang menahan core tetap tinggi adalah jasa dan sewa, dan dua komponen itu bergerak lambat. Artinya core tidak akan turun cepat walaupun minyak jatuh besok. Kalau kamu mau menebak arah core, perhatikan upah, bukan komoditas.</p><p><strong>Perkiraan arah cetakan berikutnya (analisa sendiri, bukan dari FedWatch).</strong> Yang masuk CPI itu rata-rata bulanan dibanding bulan yang sama tahun lalu, bukan harga spot. Brent rata-rata 90,8 bulan ini melawan 67,9 setahun lalu, jadi basis tahunannya +33,8%. Bulan sebelumnya +17,9%. Karena angka ini <strong>naik</strong> +15,9 poin, kontribusi energi ke headline CPI sedang <strong>berakselerasi</strong>, jadi tekanan ke headline cetakan berikutnya condong ke atas. Catatan jujur: data minyak FRED tertinggal sekitar seminggu, dan bulan berjalan belum lengkap, jadi ini estimasi arah, bukan ramalan angka.</p><p><strong>Yang belum selesai.</strong> Core PCE dan core CPI berselisih +0,82 poin. Keduanya mengaku mengukur hal yang sama. Yang dipakai Fed adalah PCE. Selama gap ini belum tertutup, membaca CPI saja bikin Fed terlihat hampir menang padahal ukurannya sendiri bilang sebaliknya.</p></div></div>
+<details><summary>Apa yang menentukan cetakan inflasi berikutnya</summary><div class="dbody">
+<p>Karena FedWatch tidak menerbitkan ramalan CPI, ini analisa dari komponen pembentuknya:</p>
+<ul>
+<li><strong>Energi</strong> · Brent 95.29 per 2026-08-18. 20 hari lalu 93.85 (+1.44). Setahun lalu sekitar 68.41, jadi basis tahunannya +39.3%. Yang masuk CPI itu <strong>rata-rata bulanan terhadap bulan yang sama tahun lalu</strong>, bukan level spot dan bukan lonjakan sesaat. Lonjakan yang bolak-balik dalam seminggu hampir tidak menggerakkan angka bulanan.</li>
+<li><strong>Jasa dan sewa</strong> · komponen paling lengket dan paling menentukan core. Bergerak lambat, jadi perubahan mendadak di core biasanya bukan dari sini.</li>
+<li><strong>Upah</strong> · lihat average hourly earnings di bagian 05. Kalau upah melandai, tekanan ke inflasi jasa ikut melandai dengan jeda beberapa bulan.</li>
+<li><strong>Ekspektasi</strong> · breakeven 10 tahun 2.32% dan 5y5y forward 2.33%. Selama dua angka ini menempel di sekitar 2%, pasar menganggap lonjakan inflasi bersifat sementara, dan itulah yang mengizinkan Fed menahan bunga. Kalau keduanya merangkak ke 3%, seluruh kalkulasi berbalik ke arah kenaikan bunga apapun penyebab inflasinya.</li>
+</ul>
+<p><strong>Peringatan lag:</strong> seri minyak FRED tertinggal sekitar seminggu dari waktu nyata. Vault ini pernah salah baca justru karena itu pada 29 Juli 2026, waktu seluruh cerita berbalik di dalam minggu yang tidak terlihat. Jangan pernah pakai angka minyak dari sini di hari keputusan Fed tanpa cek berita.</p>
+</div></details>
+<h2 id="s05"><span class="n">05</span>Ketenagakerjaan &amp; pertumbuhan</h2>
+<p class="h2sub">Sahm Rule di -0.03, masih jauh di bawah ambang resesi 0,50. Artinya kita di rezim GOOD NEWS IS BAD NEWS: data tenaga kerja yang kuat berarti Fed tidak perlu melunak, dan itu jelek untuk aset beresiko. Data tenaga kerja yang lemah justru dibaca positif.</p>
+<div class="tiles">
+<div class="tile bad">
+<span class="lbl">Tingkat pengangguran</span>
+<div class="val">4.1%</div>
+<div class="chg up">▼ -0,1pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Di rezim sekarang, pengangguran NAIK justru dibaca positif oleh aset beresiko, karena artinya Fed punya alasan melunak.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Nonfarm payrolls (perubahan)</span>
+<div class="val">-23K</div>
+<div class="chg flat">perubahan bulan ke bulan</div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan · Jumat pertama</span></div>
+<div class="means">Jumlah pekerjaan baru sebulan. Kuat = Fed tidak perlu melunak = jelek untuk aset beresiko di rezim sekarang.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Initial jobless claims</span>
+<div class="val">206,000</div>
+<div class="chg up">▼ -6.000 <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 7 hari</span></div>
+
+
+<div class="asof">minggu 2026-08-15<br><span style='opacity:.75'>MINGGUAN · tiap Kamis</span></div>
+<div class="means">Data ketenagakerjaan paling cepat yang ada. Kalau mau tahu duluan sebelum yang lain, ini tempatnya.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Pertumbuhan upah (YoY)</span>
+<div class="val">3.15%</div>
+<div class="chg dn">▼ -0,26pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 30 hari</span></div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Jalur utama inflasi jasa. Upah melandai = tekanan inflasi ikut melandai.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Sahm Rule</span>
+<div class="val">-0.03</div>
+<div class="chg flat">ambang resesi 0,50 · jarak +0.53</div>
+
+
+<div class="asof">data bulan Juli 2026<br><span style='opacity:.75'>bulanan</span></div>
+<div class="means">Kalau rata-rata 3 bulan pengangguran naik 0,50 poin di atas titik terendah 12 bulan, secara historis resesi sudah dimulai. Angka ini yang membalik arti seluruh blok ketenagakerjaan.</div>
+</div>
+<div class="tile neutral">
+<span class="lbl">GDP riil (QoQ tahunan)</span>
+<div class="val">1.5%</div>
+<div class="chg dn">▼ -0,6pp <span style="font-weight:400;color:var(--muted)">vs cetakan lalu · 90 hari</span></div>
+
+
+<div class="asof">data kuartal Q2 2026<br><span style='opacity:.75'>KUARTALAN · paling lambat</span></div>
+<div class="means">Paling terlambat dari semua. Untuk gambaran real-time, pakai Atlanta Fed GDPNow.</div>
+</div>
+</div>
+<div class="concl good"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Rezimnya dulu, baru datanya.</strong> Sahm Rule -0,03 melawan ambang resesi 0,50, jadi jaraknya masih 0,53 poin. Selama di bawah ambang, data tenaga kerja yang <strong>lemah</strong> dibaca pasar sebagai kabar <strong>baik</strong>, karena artinya Fed punya alasan melunak. Ini yang bikin pemula bingung: berita PHK bisa bikin saham naik. Bukan karena pasar kejam, tapi karena yang dihargai adalah suku bunga.</p><p><strong>Datanya sekarang:</strong> payroll BERKURANG 23 ribu, pengangguran 4,1%, klaim awal 206,000. Payroll yang <strong>negatif</strong> itu kejadian besar, bukan detail. Kombinasi ini condong <strong>lemah</strong>, dan di rezim sekarang itu justru <strong>ramah</strong> untuk aset beresiko.</p><p><strong>Kalau mau tahu duluan:</strong> klaim awal keluar tiap Kamis dan itu data ketenagakerjaan tercepat yang ada. NFP baru Jumat pertama tiap bulan, pengangguran ikut di situ, dan JOLTS paling lambat. ADP diabaikan saja, korelasinya ke NFP payah.</p></div></div>
+<p style="color:var(--muted);font-size:.85rem;margin-top:.9rem">Urutan ketepatan waktu: <strong>Initial Claims</strong> (mingguan) → <strong>NFP</strong> (Jumat pertama) → <strong>Unemployment Rate</strong> → <strong>JOLTS</strong>. Abaikan ADP, korelasinya ke NFP payah.</p>
+<h2 id="s06"><span class="n">06</span>Likuiditas</h2>
+<p class="h2sub">Suku bunga itu <em>harga</em> uang. Likuiditas itu <em>jumlah</em>-nya. Untuk crypto, jumlah sering lebih menentukan daripada harga.</p>
+<div class="tiles">
+<div class="tile bad">
+<span class="lbl">Neraca Fed</span>
+<div class="val">6,746 T</div>
+<div class="chg up">▼ -0,014 T <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">minggu 2026-08-19<br><span style='opacity:.75'>MINGGUAN · rilis Kamis</span></div>
+<div class="means">Total aset Fed. Naik = QE (uang dicetak masuk sistem). Turun = QT (uang ditarik keluar).</div>
+</div>
+<div class="tile good">
+<span class="lbl">TGA (kas pemerintah AS)</span>
+<div class="val">0,954 T</div>
+<div class="chg dn">▼ -0,010 T <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">minggu 2026-08-19<br><span style='opacity:.75'>MINGGUAN</span></div>
+<div class="means">Rekening kas Treasury. TERISI = uang tersedot keluar dari sistem = risk-off. DIKURAS = likuiditas mengalir masuk ke pasar.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Reverse Repo (RRP)</span>
+<div class="val">0,000 T</div>
+<div class="chg up">▲ +0,000 T <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">per 2026-08-25 · 1 hari lalu<br><span style='opacity:.75'>harian · lag ~1 hari</span></div>
+<div class="means">Uang yang parkir semalaman di Fed. Turun = uang keluar dari parkiran menuju pasar.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">NET LIQUIDITY (hitungan)</span>
+<div class="val">$5.792 T</div>
+<div class="chg up">▼ -0,004 T <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">minggu 2026-08-19<br><span style='opacity:.75'>seturut seri paling lambat</span></div>
+<div class="means">Neraca Fed dikurangi TGA dikurangi RRP. Proksi kasar berapa uang yang benar-benar beredar di pasar. Korelasinya dengan Bitcoin secara historis mencolok.</div>
+</div>
+<div class="tile neutral">
+<span class="lbl">Pasokan stablecoin (USDT+USDC)</span>
+<div class="val">$256.9 M</div>
+<div class="chg flat">real-time</div>
+
+
+<div class="asof">per 2026-08-26 · hari ini<br><span style='opacity:.75'>real-time · CoinGecko</span></div>
+<div class="means">Likuiditas asli khusus crypto. Naik = uang BARU masuk ekosistem, bukan sekadar uang lama yang berputar.</div>
+</div>
+</div>
+<div class="note"><strong>Catatan penting soal RRP.</strong> Saldonya tinggal $0.41 miliar per 2026-08-25, yang praktis nol. Artinya kanal "uang keluar dari parkiran menuju pasar" yang jadi bahan bakar besar di 2023-2024 <strong>sudah habis</strong>. Ke depan, tambahan likuiditas harus datang dari neraca Fed atau dari TGA yang dikuras, bukan lagi dari sini. Ini hal kecil yang gampang terlewat tapi mengubah dari mana bahan bakar berikutnya bisa muncul.</div>
+<div class="concl bad"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Cara bacanya sederhana.</strong> Bayangkan sistem keuangan sebagai kolam. Neraca Fed itu keran yang mengisi. TGA (rekening kas pemerintah) dan RRP (parkiran semalam) itu dua ember yang menahan air keluar dari kolam. Net liquidity adalah air yang benar-benar tersisa di kolam untuk dibelanjakan ke aset.</p><p><strong>Sekarang kolamnya berisi $5,792 triliun</strong>, dan turun $4 miliar dari cetakan mingguan sebelumnya. Arah turun berarti bahan bakar sedang berkurang, walaupun perubahan satu minggu itu kecil dan jangan dibaca berlebihan.</p><p><strong>Dan ini bagian yang paling penting di bagian ini.</strong> Ember RRP tinggal $0,41 miliar, praktis kosong. Sepanjang 2023-2024, pengurasan ember inilah yang jadi bahan bakar besar buat aset beresiko: uang pindah dari parkiran Fed ke pasar. <strong>Sumber itu sudah habis.</strong> Ke depan, tambahan likuiditas harus datang dari Fed melonggarkan neraca atau dari TGA yang dikuras. Ini hal kecil yang jarang masuk berita tapi mengubah dari mana kenaikan berikutnya bisa dibiayai.</p><p><strong>Khusus crypto</strong>, ada kolam kedua: pasokan stablecoin $257 miliar. Ini uang yang sudah ada di dalam ekosistem dan tinggal dibelanjakan. USDT dominance 6,87% memberi tahu seberapa banyak dari uang itu yang masih duduk diam. Turun = uangnya sedang dipakai beli aset. Naik = orang kabur ke tempat aman tanpa keluar dari crypto.</p></div></div>
+<h2 id="s07"><span class="n">07</span>Selera risiko &amp; posisi pasar</h2>
+<p class="h2sub">Makro menjelaskan koreknya. Bagian ini menjelaskan bahan bakarnya. Ledakan besar terjadi waktu keduanya bertemu.</p>
+<div class="tiles">
+<div class="tile good">
+<span class="lbl">Spread kredit high-yield</span>
+<div class="val">2.69%</div>
+<div class="chg dn">▼ -0,01% <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian</span></div>
+<div class="means">Berapa ekstra bunga yang diminta untuk meminjamkan ke perusahaan berisiko. Melebar = pasar kredit takut. Ini pengukur selera risiko paling jujur yang ada.</div>
+</div>
+<div class="tile good">
+<span class="lbl">VIX</span>
+<div class="val">15.85</div>
+<div class="chg up">▲ +0,72 <span style="font-weight:400;color:var(--muted)">vs cetakan lalu</span></div>
+
+
+<div class="asof">per 2026-08-24 · 2 hari lalu<br><span style='opacity:.75'>harian</span></div>
+<div class="means">Volatilitas saham yang diharapkan 30 hari ke depan.</div>
+</div>
+</div>
+<h3 style="font-size:.95rem;margin:1.6rem 0 .3rem">Posisi pasar crypto</h3>
+<p class="h2sub">Riset manual per 2026-08-26</p>
+<div class="tiles">
+<div class="tile good">
+<span class="lbl">Arus ETF BTC spot</span>
+<div class="val"><span style="font-size:1rem">+$337,6 jt (24 Ags), 6 sesi inflow beruntun (17-21 &amp; 24 Agustus)</span></div>
+
+
+
+<div class="asof">per 2026-08-26<br><span style="opacity:.75">riset manual</span></div>
+<div class="means">Uang tunai baru yang tidak pakai leverage, jadi ini pembeli paling 'nyata' yang ada di crypto. Koreksi dari catatan sesi sebelumnya: tabel harian tftc.io menunjukkan $337,6 jt itu angka 24 Agustus (bukan 25 Agustus), dan streak-nya 6 hari kerja berturut-turut, bukan 7. Data resmi untuk 25-26 Agustus belum muncul di tabel ini per saat pengecekan, jadi jangan dianggap ada tambahan hari lagi sampai terkonfirmasi.</div>
+</div>
+<div class="tile neutral">
+<span class="lbl">Open Interest futures BTC</span>
+<div class="val"><span style="font-size:1rem">~$55,64 miliar</span></div>
+
+
+
+<div class="asof">per 2026-08-26<br><span style="opacity:.75">riset manual</span></div>
+<div class="means">OI nyaris sama dengan pengecekan sebelumnya (~$55,9 miliar), jadi masih dianggap datar. Artinya belum ada penumpukan leverage baru yang mencolok, tapi juga belum ada pembersihan posisi besar-besaran.</div>
+</div>
+<div class="tile good">
+<span class="lbl">Funding rate perpetual</span>
+<div class="val"><span style="font-size:1rem">positif, ~0,0049%/8 jam (~5,3% setahun)</span></div>
+
+
+
+<div class="asof">per 2026-08-26<br><span style="opacity:.75">riset manual</span></div>
+<div class="means">Funding positif tapi rendah berarti posisi long tidak berdesakan. Kalau funding melonjak tinggi, itu tanda semua orang sudah long dan pasar jadi rapuh terhadap koreksi.</div>
+</div>
+<div class="tile bad">
+<span class="lbl">Likuidasi 24 jam</span>
+<div class="val"><span style="font-size:1rem">$64,0 jt total, $57,4 jt (89,7%) di sisi long</span></div>
+
+
+
+<div class="asof">per 2026-08-26<br><span style="opacity:.75">riset manual</span></div>
+<div class="means">Yang kena tebas mayoritas long, tanda pembeli dengan leverage masuk terlalu agresif dekat harga tinggi lalu dipaksa keluar. Nilainya jauh lebih kecil dari lonjakan likuidasi 19-21 Agustus, jadi ini pembersihan kecil, bukan crash besar.</div>
+</div>
+</div>
+<div class="concl neutral"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Kenapa kamu perlu peduli ke bagian ini.</strong> Makro menentukan arah angin. Posisi pasar menentukan seberapa keras badainya. Pergerakan raksasa hampir selalu terjadi waktu berita kecil menghantam posisi yang sudah terlalu satu sisi, bukan waktu berita besar menghantam pasar yang seimbang.</p><p><strong>Kondisi sekarang:</strong> arus etf btc spot mendukung, funding rate perpetual mendukung, likuidasi 24 jam menekan. Likuidasi yang menumpuk di sisi long berarti yang tersapu belakangan ini adalah pembeli, bukan penjual. Itu kebalikan dari 19-21 Agustus, waktu 92% likuidasi adalah short dan justru itulah yang meledakkan harga ke atas. Bahan bakar untuk short squeeze berikutnya jadi lebih tipis.</p><p>Digabung dengan spread kredit yang masih sempit, sisi <em>selera risiko</em> belum memberi tanda bahaya. Yang menekan datang dari sisi suku bunga, bukan dari sisi kepercayaan.</p></div></div>
+<details><summary>Kenapa bagian ini ada: berita cuma pemicu, posisi adalah bahan bakarnya</summary><div class="dbody">
+<p>Kejadian 19-21 Agustus 2026 di vault ini adalah contoh paling bersih. Treasury mengumumkan buyback obligasi jangka panjang digandakan dari $2 miliar ke $4 miliar. Yield 30 tahun turun dari 5,337% ke sekitar 5,19%. Bitcoin meledak.</p>
+<p><strong>Tapi keesokan harinya yield sudah balik naik dan hampir menghapus seluruh penurunannya, dan Bitcoin tetap naik $6.000 lagi.</strong> Katalisnya sudah hilang tapi efeknya jalan terus. Artinya katalis itu bukan mekanismenya.</p>
+<p>Mekanismenya kelihatan di tape likuidasi: sekitar $2,7 miliar posisi short ditutup paksa dalam 24 jam, 92% dari seluruh likuidasi, dengan lebih dari $1 miliar short BTC tertutup dalam satu jam saja. Short yang ditutup paksa <em>wajib membeli</em>, tidak peduli harga.</p>
+<p>Aritmetikanya juga tidak nyambung: buyback $4 miliar melawan tumpukan utang $40 triliun itu debu, analis sendiri menyebutnya sebagian besar simbolis. Berita sekecil itu tidak bisa merevaluasi aset sebesar 17%. <strong>Kalau aritmetika katalisnya tidak sampai ke aritmetika pergerakannya, selisihnya diisi arus paksaan.</strong></p>
+<p>Tiga pertanyaan yang bisa kamu pakai tiap kali ada pergerakan besar: (1) berapa nilai beritanya dalam dolar, sebanding tidak dengan besar pergerakannya? (2) apa yang terposisikan masuk ke situ, cek funding, open interest, likuidasi? (3) katalisnya masih berlaku hari berikutnya? Katalis yang berbalik sementara harga jalan terus sudah terfalsifikasi sebagai penjelasan.</p>
+</div></details>
+<h2 id="s08"><span class="n">08</span>Fed: sekarang vs yang dihargai pasar</h2>
+<p class="h2sub">Rapat 2026-09-16 · riset manual per 2026-08-26</p>
+<div class="scroll"><table><tr><th>Hasil</th><th class="num">Peluang</th><th class="num">Rentang antar venue</th></tr>
+<tr><td>Hold (tidak berubah)</td><td class="num">68%</td><td class="num">67-70%</td></tr>
+<tr><td>Hike 25 bps</td><td class="num">31%</td><td class="num">28-33%</td></tr>
+<tr><td>Cut 25 bps</td><td class="num">1%</td><td class="num">0-2%</td></tr>
+</table></div>
+<div class="note">Dicek ulang 26 Agustus 2026, langsung dari halaman Polymarket (68% hold / 33% hike / 1,3% cut) plus laporan pers yang mengutip CME FedWatch (sekitar 70% hold / 30% hike), jadi dua sumber ini sekarang sudah dekat, tidak lebar seperti minggu-minggu sebelumnya. PCE Juli dirilis pagi ini juga, tapi media saling beda menyebut angka core-nya (ada yang bilang di kisaran akhir-2%, ada yang bilang di kisaran rendah-3%), jadi angka pasti sengaja tidak ditulis di sini sampai ada sumber yang konsisten. Aturan vault: probabilitas tangan-kedua dikutip sebagai RENTANG, tidak pernah sebagai titik.</div>
+<p><strong>Suku bunga riil kebijakan: +0,46%.</strong> Ini batas atas Fed (3,75%) dikurangi core PCE (3,29%). Angka setipis ini berarti kebijakan sebenarnya <strong>tidak ketat</strong> menurut ukuran target Fed sendiri. Kalau core PCE terus naik sementara bunga nominal diam, kebijakan justru <em>melonggar</em> secara pasif. Ini argumen struktural terkuat untuk kenaikan bunga, dan kebalikan dari framing 'menahan bunga itu sikap ketat'.</p>
+<div class="concl neutral"><div class="ct">Kesimpulan bagian ini</div><div class="cb"><p><strong>Apa artinya buat kamu.</strong> Pasar menghargai sekitar 31% kemungkinan kenaikan bunga bulan depan, artinya <em>skenario dasar</em> yang sudah ada di harga adalah Fed diam. Yang menggerakkan pasar bukan keputusannya, tapi <strong>selisih antara keputusan dan apa yang sudah dihargai</strong>. Hold yang sudah 95% diperkirakan hampir tidak menggerakkan apa-apa; nada konferensi persnya yang bekerja.</p><p><strong>Yang bikin ini rapuh:</strong> suku bunga riil kebijakan tipis sekali, jadi menahan bunga sebenarnya bukan sikap ketat. Kalau core PCE naik lagi sementara bunga nominal diam, kebijakan justru melonggar tanpa Fed melakukan apa pun. Itu argumen struktural terkuat untuk kenaikan bunga, dan pasar belum banyak menghargainya. Ini titik di mana analisa di halaman ini berbeda dari angka pasar, dan perbedaannya sengaja tidak diratakan.</p></div></div>
+<details><summary>Bank Indonesia · kenapa mandat berbeda menghasilkan aksi berlawanan</summary><div class="dbody">
+<p><strong>BI-Rate 5.75%</strong> · Deposit Facility 4.75% · Lending Facility 6.50% · per 2026-08-19</p>
+<p>Ditahan di 5,75% pada RDG 18-19 Agustus 2026, sama seperti Juli. Sebelumnya BI menaikkan kumulatif 100 bps sepanjang Mei-Juni 2026. Alasan resmi: stabilitas rupiah di tengah volatilitas global akibat perang Timur Tengah, sambil menjaga target inflasi 2,5% plus minus 1%. Catatan penting: BI mengetatkan di guncangan global yang sama yang Fed diamkan saja, karena mandatnya beda. RDG pertama yang dipimpin Destry Damayanti.</p>
+<p>Ini kontras yang berguna dipahami. Fed punya mandat ganda (inflasi 2% plus lapangan kerja maksimum). BI punya tambahan mandat stabilitas rupiah, yang membawa jalur nilai tukar dan selisih suku bunga yang tidak dimiliki Fed. Rupiah lemah menaikkan harga impor dan selisih bunga yang tipis terhadap dolar mengundang arus modal keluar. Jadi BI mengetatkan ke dalam guncangan global yang sama yang Fed diamkan saja. Dunia yang sama, mandat berbeda, aksi berlawanan.</p>
+</div></details>
+<h2 id="s09"><span class="n">09</span>Kalender: apa yang akan menggerakkan pasar</h2>
+<p class="h2sub">Yang bertanda oranye = dampak tinggi. Hitung mundur otomatis.</p>
+<div class="cal">
+<div class="ev high"><div class="when">08-26<small>08:30 ET</small><small class="cd">hari ini</small></div><div><div class="t">PCE Juli (Personal Income &amp; Outlays)</div><div class="w">Ini ukuran inflasi yang JADI TARGET RESMI Fed, bukan CPI. Core PCE sudah beberapa bulan berjalan jauh di atas core CPI (lihat selisihnya di bagian 04, dihitung langsung dari data terbaru). Selama gap itu belum tertutup, membaca CPI saja bikin Fed terlihat hampir menang padahal ukuran yang dipakai Fed sendiri bilang sebaliknya. Cetakan hari ini yang menentukan siapa yang benar.</div></div></div>
+<div class="ev medium"><div class="when">08-27<small>—</small><small class="cd">besok</small></div><div><div class="t">Jackson Hole hari 1 (27-29 Agustus)</div><div class="w">Simposium Kansas City Fed, tema tahun ini 'Financial Innovation: Implications for Payments and Policy'. Sekitar 120 bankir sentral dari 70+ negara.</div></div></div>
+<div class="ev medium"><div class="when">08-27<small>08:30 ET</small><small class="cd">besok</small></div><div><div class="t">Initial Jobless Claims (mingguan)</div><div class="w">Data ketenagakerjaan paling cepat yang ada. Tiap Kamis.</div></div></div>
+<div class="ev high"><div class="when">08-28<small>~10:00 ET</small><small class="cd">2 hari lagi</small></div><div><div class="t">Keynote pertama Kevin Warsh sebagai Ketua Fed</div><div class="w">Warsh sudah membuang forward guidance sejak menjabat, jadi pasar buta soal arah. Ini kesempatan pertama dia bicara panjang di panggung besar, dan jatuh 19 hari sebelum keputusan 16 September. Plateau 30% hike odds yang bertahan sejak 17 Agustus diuji di sini.</div></div></div>
+<div class="ev high"><div class="when">09-04<small>08:30 ET</small><small class="cd">9 hari lagi</small></div><div><div class="t">Nonfarm Payrolls Agustus + Unemployment Rate</div><div class="w">Laporan ketenagakerjaan terakhir sebelum FOMC. Ingat: sekarang rezim 'good news is bad news', jadi payroll kuat justru jelek buat aset beresiko.</div></div></div>
+<div class="ev high"><div class="when">09-11<small>08:30 ET</small><small class="cd">16 hari lagi</small></div><div><div class="t">CPI Agustus</div><div class="w">Cetakan inflasi terakhir sebelum FOMC, cuma 5 hari sebelumnya. Biasanya event volatilitas satu-hari terbesar di kalender makro, mengalahkan FOMC sendiri.</div></div></div>
+<div class="ev high"><div class="when">09-16<small>14:00 ET</small><small class="cd">21 hari lagi</small></div><div><div class="t">Keputusan FOMC + DOT PLOT</div><div class="w">Salah satu dari cuma 4 rapat setahun yang menerbitkan dot plot (proyeksi suku bunga tiap anggota). Dot plot sering menggerakkan pasar lebih keras daripada keputusannya sendiri.</div></div></div>
+<div class="ev high"><div class="when">11-04<small>—</small><small class="cd">70 hari lagi</small></div><div><div class="t">Quarterly Refunding Announcement (QRA) Q4</div><div class="w">Treasury mengumumkan berapa banyak utang diterbitkan dan di tenor mana, plus jadwal buyback. INI kelas berita yang memicu lonjakan BTC 19-21 Agustus: judulnya kering dan administratif, dampaknya brutal. Tanggal dikonfirmasi ulang 26 Agustus: QRA berikutnya jatuh 4 November, bukan 2 November seperti perkiraan sebelumnya.</div></div></div>
+</div>
+<h2 id="s10"><span class="n">10</span>Aturan penilaian &amp; catatan kejujuran</h2>
+<details><summary>Aturan warna hijau/merah, ditulis supaya tidak bisa diubah diam-diam</summary><div class="dbody">
+<div class="scroll"><table><tr><th>Metrik</th><th>Aturan</th></tr>
+<tr><td><strong>Yield riil 10 tahun (DFII10)</strong></td><td>Turun = BAGUS. Ini biaya uang yang sesungguhnya. Kalau cuma boleh pantau satu angka untuk crypto dan emas, pantau ini. Ambang mati 10 bps / 20 hari.</td></tr>
+<tr><td><strong>Term premium 10 tahun</strong></td><td>Naik = JELEK. Ini bagian yield yang bukan soal Fed, tapi soal risiko memegang utang jangka panjang: defisit, banjir penerbitan, kredibilitas fiskal. Kenaikan yield lewat jalur ini yang paling beracun.</td></tr>
+<tr><td><strong>Spread kredit high-yield</strong></td><td>Melebar = JELEK. Kalau ini bertentangan dengan indeks saham, percayai kredit.</td></tr>
+<tr><td><strong>Core CPI / Core PCE</strong></td><td>Naik = JELEK. Yang direaksi Fed itu core, bukan headline, karena suku bunga tidak bisa memproduksi minyak.</td></tr>
+<tr><td><strong>Pengangguran &amp; klaim</strong></td><td>TERGANTUNG REZIM. Sahm di bawah 0,50: data lemah = BAGUS (Fed melunak). Sahm di atas 0,50: data lemah = JELEK (resesi datang).</td></tr>
+<tr><td><strong>GDP</strong></td><td>TERGANTUNG REZIM. Rezim pertumbuhan: tinggi = bagus. Rezim inflasi: tinggi = jelek, karena Fed jadi punya alasan untuk tetap galak.</td></tr>
+<tr><td><strong>Minyak (WTI/Brent)</strong></td><td>Naik = JELEK. Guncangan pasokan itu stagflasioner: inflasi naik DAN pertumbuhan turun, jadi obligasi dan saham kena bareng.</td></tr>
+<tr><td><strong>Dolar</strong></td><td>Naik = JELEK. Dolar kuat mengetatkan kondisi keuangan global.</td></tr>
+<tr><td><strong>Net liquidity (WALCL − TGA − RRP)</strong></td><td>Naik = BAGUS. Ini jumlah uang di sistem, bukan harganya.</td></tr>
+<tr><td><strong>USDT dominance</strong></td><td>Naik = JELEK. Uang parkir di stablecoin artinya orang keluar dari risiko tanpa keluar dari crypto.</td></tr>
+<tr><td><strong>Peluang hike Fed</strong></td><td>Naik = JELEK.</td></tr>
+</table></div>
+<p>Detektor rezim jalan <strong>duluan</strong>, baru tiap metrik dinilai dengan rezim itu sebagai konteks. Alasannya: data yang sama punya arti berlawanan di rezim berbeda, jadi menilai metrik tanpa menetapkan rezim dulu itu asal-asalan.</p>
+<p>Warna dinilai dari perubahan <strong>20 observasi</strong> supaya tidak berkedip-kedip karena satu hari yang berisik, sementara angka delta yang ditampilkan di tiap kotak adalah perubahan versus <strong>cetakan resmi sebelumnya</strong> seperti yang kamu minta. Dua hal berbeda, keduanya ditampilkan.</p>
+</div></details>
+<details><summary>Batasan yang perlu kamu tahu sebelum percaya halaman ini</summary><div class="dbody">
+<ul>
+<li><strong>Ini alat baca, bukan sinyal trading.</strong> Semua di halaman ini kerangka penjelasan. Tidak ada satu pun yang otomatis jadi aturan yang bisa ditradingkan. Korelasi makro ke harga aset tidak stabil, berbalik tanda antar rezim, dan sudah dihargai oleh pihak yang datanya lebih cepat. Kalau sesuatu di sini mulai terasa seperti aturan yang bisa dites, aturannya: daftarkan dulu aturannya secara tertulis beserta kriteria lulusnya, baru tes. Jangan pernah mengubah kriteria setelah melihat hasil.</li>
+<li><strong>Lag itu nyata dan pernah menipu vault ini.</strong> Tiap angka membawa tanggal cetakannya sendiri justru karena itu. Term premium tertinggal ~10 hari, minyak ~seminggu, GDP satu kuartal. Jangan sandingkan begitu saja seolah semuanya menggambarkan hari ini.</li>
+<li><strong>CME FedWatch tidak bisa diakses dari mesin ini</strong> (dicek ulang, http=000). Kalshi API timeout. Jadi peluang hike di atas berasal dari Polymarket dan laporan pers, dikutip sebagai rentang, bukan titik. Venue-venue ini rutin tidak sepakat.</li>
+<li><strong>Angka yang gagal ditarik ditampilkan sebagai gagal</strong>, tidak pernah dihilangkan diam-diam, dan tidak pernah diisi dari ingatan.</li>
+</ul>
+</div></details>
+<div class="foot">Dibuat oleh <code>scripts/build_macro_dashboard.py</code> · 2026-08-26 15:52 WIB · sumber otomatis FRED + CoinGecko, sumber manual bertanggal di <code>scripts/macro_manual.json</code> · snapshot mentah tersimpan di <code>raw/macro-data-pulls/snapshots/</code>.<br>Penjelasan konsep lengkap ada di halaman wiki <code>concepts/macro-drivers-of-risk-assets.md</code>.</div>
+</div>
+</body>
+</html>

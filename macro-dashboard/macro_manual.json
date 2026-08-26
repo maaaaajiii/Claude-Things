@@ -1,0 +1,146 @@
+{
+  "_README": "Data yang TIDAK bisa ditarik otomatis dari FRED/CoinGecko dari mesin ini. Diisi lewat riset web. Setiap entri wajib punya as_of + source. Script akan menandai entri yang as_of-nya sudah lewat stale_after_days sebagai BASI, jadi jangan takut angkanya ketinggalan: dia akan teriak sendiri.",
+  "_updated": "2026-08-26",
+  "fed_odds": {
+    "meeting": "2026-09-16",
+    "as_of": "2026-08-26",
+    "stale_after_days": 4,
+    "note": "Dicek ulang 26 Agustus 2026, langsung dari halaman Polymarket (68% hold / 33% hike / 1,3% cut) plus laporan pers yang mengutip CME FedWatch (sekitar 70% hold / 30% hike), jadi dua sumber ini sekarang sudah dekat, tidak lebar seperti minggu-minggu sebelumnya. PCE Juli dirilis pagi ini juga, tapi media saling beda menyebut angka core-nya (ada yang bilang di kisaran akhir-2%, ada yang bilang di kisaran rendah-3%), jadi angka pasti sengaja tidak ditulis di sini sampai ada sumber yang konsisten. Aturan vault: probabilitas tangan-kedua dikutip sebagai RENTANG, tidak pernah sebagai titik.",
+    "outcomes": [
+      {
+        "label": "Hold (tidak berubah)",
+        "pct": 68,
+        "range": "67-70"
+      },
+      {
+        "label": "Hike 25 bps",
+        "pct": 31,
+        "range": "28-33"
+      },
+      {
+        "label": "Cut 25 bps",
+        "pct": 1,
+        "range": "0-2"
+      }
+    ],
+    "sources": [
+      "https://polymarket.com/event/fed-decision-in-september-762",
+      "https://www.cnbc.com/2026/08/07/odds-the-fed-hikes-in-september-tumble-following-big-july-jobs-miss.html",
+      "https://defirate.com/prediction-markets/fed-decision-odds/"
+    ]
+  },
+  "calendar": [
+    {
+      "date": "2026-08-26",
+      "time": "08:30 ET",
+      "impact": "high",
+      "title": "PCE Juli (Personal Income & Outlays)",
+      "why": "Ini ukuran inflasi yang JADI TARGET RESMI Fed, bukan CPI. Core PCE sudah beberapa bulan berjalan jauh di atas core CPI (lihat selisihnya di bagian 04, dihitung langsung dari data terbaru). Selama gap itu belum tertutup, membaca CPI saja bikin Fed terlihat hampir menang padahal ukuran yang dipakai Fed sendiri bilang sebaliknya. Cetakan hari ini yang menentukan siapa yang benar.",
+      "source": "https://www.bea.gov/data/personal-consumption-expenditures-price-index"
+    },
+    {
+      "date": "2026-08-27",
+      "time": "—",
+      "impact": "medium",
+      "title": "Jackson Hole hari 1 (27-29 Agustus)",
+      "why": "Simposium Kansas City Fed, tema tahun ini 'Financial Innovation: Implications for Payments and Policy'. Sekitar 120 bankir sentral dari 70+ negara.",
+      "source": "https://www.regardsofwallstreet.com/news/jackson-hole-2026-dates-schedule-warsh-first-speech"
+    },
+    {
+      "date": "2026-08-27",
+      "time": "08:30 ET",
+      "impact": "medium",
+      "title": "Initial Jobless Claims (mingguan)",
+      "why": "Data ketenagakerjaan paling cepat yang ada. Tiap Kamis.",
+      "source": "https://fred.stlouisfed.org/series/ICSA"
+    },
+    {
+      "date": "2026-08-28",
+      "time": "~10:00 ET",
+      "impact": "high",
+      "title": "Keynote pertama Kevin Warsh sebagai Ketua Fed",
+      "why": "Warsh sudah membuang forward guidance sejak menjabat, jadi pasar buta soal arah. Ini kesempatan pertama dia bicara panjang di panggung besar, dan jatuh 19 hari sebelum keputusan 16 September. Plateau 30% hike odds yang bertahan sejak 17 Agustus diuji di sini.",
+      "source": "https://thefrontmonth.com/articles/2026-08-21-warsh-jackson-hole-keynote-aug-28/"
+    },
+    {
+      "date": "2026-09-04",
+      "time": "08:30 ET",
+      "impact": "high",
+      "title": "Nonfarm Payrolls Agustus + Unemployment Rate",
+      "why": "Laporan ketenagakerjaan terakhir sebelum FOMC. Ingat: sekarang rezim 'good news is bad news', jadi payroll kuat justru jelek buat aset beresiko.",
+      "source": "https://www.bls.gov/ces/"
+    },
+    {
+      "date": "2026-09-11",
+      "time": "08:30 ET",
+      "impact": "high",
+      "title": "CPI Agustus",
+      "why": "Cetakan inflasi terakhir sebelum FOMC, cuma 5 hari sebelumnya. Biasanya event volatilitas satu-hari terbesar di kalender makro, mengalahkan FOMC sendiri.",
+      "source": "https://www.bls.gov/cpi/"
+    },
+    {
+      "date": "2026-09-16",
+      "time": "14:00 ET",
+      "impact": "high",
+      "title": "Keputusan FOMC + DOT PLOT",
+      "why": "Salah satu dari cuma 4 rapat setahun yang menerbitkan dot plot (proyeksi suku bunga tiap anggota). Dot plot sering menggerakkan pasar lebih keras daripada keputusannya sendiri.",
+      "source": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "date": "2026-11-04",
+      "time": "—",
+      "impact": "high",
+      "title": "Quarterly Refunding Announcement (QRA) Q4",
+      "why": "Treasury mengumumkan berapa banyak utang diterbitkan dan di tenor mana, plus jadwal buyback. INI kelas berita yang memicu lonjakan BTC 19-21 Agustus: judulnya kering dan administratif, dampaknya brutal. Tanggal dikonfirmasi ulang 26 Agustus: QRA berikutnya jatuh 4 November, bukan 2 November seperti perkiraan sebelumnya.",
+      "source": "https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding"
+    }
+  ],
+  "bi": {
+    "as_of": "2026-08-19",
+    "stale_after_days": 40,
+    "rate": 5.75,
+    "deposit_facility": 4.75,
+    "lending_facility": 6.5,
+    "note": "Ditahan di 5,75% pada RDG 18-19 Agustus 2026, sama seperti Juli. Sebelumnya BI menaikkan kumulatif 100 bps sepanjang Mei-Juni 2026. Alasan resmi: stabilitas rupiah di tengah volatilitas global akibat perang Timur Tengah, sambil menjaga target inflasi 2,5% plus minus 1%. Catatan penting: BI mengetatkan di guncangan global yang sama yang Fed diamkan saja, karena mandatnya beda. RDG pertama yang dipimpin Destry Damayanti.",
+    "sources": [
+      "https://www.antaranews.com/berita/5701356/bi-umumkan-bi-rate-tetap-575-persen-pada-rdg-agustus-2026",
+      "https://www.cnbcindonesia.com/market/20260819132046-17-760588/breaking-news-bi-rate-tetap-575-agustus-2026"
+    ]
+  },
+  "crypto_positioning": {
+    "as_of": "2026-08-26",
+    "stale_after_days": 3,
+    "items": [
+      {
+        "label": "Arus ETF BTC spot",
+        "value": "+$337,6 jt (24 Ags), 6 sesi inflow beruntun (17-21 & 24 Agustus)",
+        "verdict": "good",
+        "why": "Uang tunai baru yang tidak pakai leverage, jadi ini pembeli paling 'nyata' yang ada di crypto. Koreksi dari catatan sesi sebelumnya: tabel harian tftc.io menunjukkan $337,6 jt itu angka 24 Agustus (bukan 25 Agustus), dan streak-nya 6 hari kerja berturut-turut, bukan 7. Data resmi untuk 25-26 Agustus belum muncul di tabel ini per saat pengecekan, jadi jangan dianggap ada tambahan hari lagi sampai terkonfirmasi."
+      },
+      {
+        "label": "Open Interest futures BTC",
+        "value": "~$55,64 miliar",
+        "verdict": "neutral",
+        "why": "OI nyaris sama dengan pengecekan sebelumnya (~$55,9 miliar), jadi masih dianggap datar. Artinya belum ada penumpukan leverage baru yang mencolok, tapi juga belum ada pembersihan posisi besar-besaran."
+      },
+      {
+        "label": "Funding rate perpetual",
+        "value": "positif, ~0,0049%/8 jam (~5,3% setahun)",
+        "verdict": "good",
+        "why": "Funding positif tapi rendah berarti posisi long tidak berdesakan. Kalau funding melonjak tinggi, itu tanda semua orang sudah long dan pasar jadi rapuh terhadap koreksi."
+      },
+      {
+        "label": "Likuidasi 24 jam",
+        "value": "$64,0 jt total, $57,4 jt (89,7%) di sisi long",
+        "verdict": "bad",
+        "why": "Yang kena tebas mayoritas long, tanda pembeli dengan leverage masuk terlalu agresif dekat harga tinggi lalu dipaksa keluar. Nilainya jauh lebih kecil dari lonjakan likuidasi 19-21 Agustus, jadi ini pembersihan kecil, bukan crash besar."
+      }
+    ],
+    "sources": [
+      "https://coinstats.app/ai/a/latest-news-for-bitcoin",
+      "https://hedgeco.net/news/08/2026/spot-bitcoin-etfs-took-in-337-6-million-on-august-24-a-sixth-straight-inflow.html",
+      "https://www.tftc.io/bitcoin-etf-flows/august-2026",
+      "https://www.coinglass.com/currencies/BTC/futures"
+    ]
+  }
+}
