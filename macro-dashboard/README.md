@@ -58,7 +58,11 @@ venues rather than a point, because the venues routinely disagree by 10 to 20 po
 same day.
 
 Refreshing the manual half needs a browsing agent; `macro-refresh-prompt.md` is the instruction
-set for it. The rules in that prompt matter more than the mechanics: **never invent a number**,
+set for it, and CI runs it through `anthropics/claude-code-action` before each build. That step is
+marked `continue-on-error` on purpose: if the refresh fails, the build still runs, the FRED data
+stays current, and only the manual blocks go stale. Enable it by setting the repository secret
+`CLAUDE_CODE_OAUTH_TOKEN` (generate one with `claude setup-token`); without that secret the step
+is skipped and everything else works unchanged. The rules in that prompt matter more than the mechanics: **never invent a number**,
 keep the old value *and its old date* when nothing can be verified, and let the page mark it
 stale. A visibly stale number is correct. A fabricated fresh one is the worst thing that can
 happen to this file.
