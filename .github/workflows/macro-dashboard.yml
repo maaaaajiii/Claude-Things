@@ -28,14 +28,37 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # The builder is pure Python standard library on purpose: no pandas, no
       # requests, nothing to install, nothing to pin, nothing to break on upgrade.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+
+      # STAGE 1 - refresh the half that cannot be fetched programmatically: the
+      # economic calendar, Fed decision odds, crypto positioning, the BI rate. That
+      # needs a browsing agent, so it runs through the Claude action.
+      #
+      # continue-on-error is deliberate and is the whole point of the design. A
+      # failure here must never block the build below: the automated FRED data stays
+      # fresh regardless, and the manual data simply keeps its old values and labels
+      # itself stale on the page. Losing the refresh is an inconvenience. Losing the
+      # entire dashboard because the refresh had a bad day is not.
+      - name: Refresh manual data (web research)
+        if: env.HAS_CLAUDE_TOKEN == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Read macro-dashboard/macro-refresh-prompt.md and follow it exactly.
+            Work only inside the macro-dashboard/ folder. Do not commit or push;
+            a later step in this same workflow does that.
+          claude_args: '--allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep"'
 
       - name: Build dashboard
         working-directory: macro-dashboard
@@ -49,10 +72,12 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add macro-dashboard/dashboard.html \
-                  macro-dashboard/snapshots \
-                  macro-dashboard/macro_manual.json \
-                  macro-dashboard/macro-refresh-status.json 2>/dev/null || true
+          # Stage the whole folder rather than naming paths. "git add a b c" fails
+          # ATOMICALLY when any one pathspec matches nothing, staging none of them, and
+          # macro-refresh-status.json only exists after the refresh stage has run. The
+          # first version therefore staged nothing, swallowed the error via "|| true",
+          # and reported "Nothing changed" on every run while the build itself was green.
+          git add -A macro-dashboard
           if git diff --staged --quiet; then
             echo "Nothing changed, nothing to commit."
           else
@@ -72,7 +97,7 @@ jobs:
           mkdir -p _site
           cp macro-dashboard/dashboard.html _site/index.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         if: vars.ENABLE_PAGES == 'true'
         with:
           path: _site
@@ -86,4 +111,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
