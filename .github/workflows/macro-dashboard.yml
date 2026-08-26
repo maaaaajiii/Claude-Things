@@ -1,29 +1,30 @@
 name: Macro Dashboard
 
-# Rebuilds dashboard.html from FRED + CoinGecko on a schedule, so it stays current
-# without any local machine needing to be on.
+# MINIMAL BY DESIGN, for now.
 #
-# Times are UTC. 14:30 UTC = 21:30 WIB, which is one hour after the 08:30 ET releases
-# (CPI, PCE, NFP) land. 00:00 UTC = 07:00 WIB, which picks up the previous US session
-# once FRED has posted it, and acts as the safety net for anything the earlier run was
-# too early to catch.
+# Two earlier attempts produced no bot commit and no readable failure, and the run
+# logs are not visible from where this was authored, so this version is stripped to
+# the smallest thing that can possibly work: fetch, build, commit. The web-research
+# stage and the Pages deploy are removed rather than merely disabled, and go back in
+# one at a time once this is green. Git history has the full version.
+#
+# It also reports itself: every step writes to the job summary, so the outcome is
+# readable on the run page without opening a single log group.
+#
+# Times are UTC. 14:30 UTC = 21:30 WIB, an hour after the 08:30 ET releases (CPI,
+# PCE, NFP). 00:00 UTC = 07:00 WIB, the safety net for whatever the earlier run was
+# too early to see.
 on:
   schedule:
     - cron: "30 14 * * *"
     - cron: "0 0 * * *"
-  workflow_dispatch:        # lets you run it by hand from the Actions tab
+  workflow_dispatch:
 
-# Needed so the job can commit the rebuilt dashboard and the new snapshot back.
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
-# If a run is already in progress, let it finish rather than racing it: two jobs
-# pushing to the same branch is exactly how you get a rejected push.
-# cancel-in-progress was false at first, which was wrong: a run that hangs then
-# blocks every later run behind it in the queue, and the symptom looks identical to
-# 'nothing happened'. A newer run is always the one worth keeping.
+# A newer run always wins. The opposite setting let a hung run block everything
+# queued behind it, which from outside is indistinguishable from nothing happening.
 concurrency:
   group: macro-dashboard
   cancel-in-progress: true
@@ -31,89 +32,80 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    env:
-      HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+    timeout-minutes: 15
+
     steps:
       - uses: actions/checkout@v5
 
-      # The builder is pure Python standard library on purpose: no pandas, no
-      # requests, nothing to install, nothing to pin, nothing to break on upgrade.
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      # STAGE 1 - refresh the half that cannot be fetched programmatically: the
-      # economic calendar, Fed decision odds, crypto positioning, the BI rate. That
-      # needs a browsing agent, so it runs through the Claude action.
-      #
-      # continue-on-error is deliberate and is the whole point of the design. A
-      # failure here must never block the build below: the automated FRED data stays
-      # fresh regardless, and the manual data simply keeps its old values and labels
-      # itself stale on the page. Losing the refresh is an inconvenience. Losing the
-      # entire dashboard because the refresh had a bad day is not.
-      - name: Refresh manual data (web research)
-        if: env.HAS_CLAUDE_TOKEN == 'true'
-        continue-on-error: true
-        timeout-minutes: 10
-        uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            Read macro-dashboard/macro-refresh-prompt.md and follow it exactly.
-            Work only inside the macro-dashboard/ folder. Do not commit or push;
-            a later step in this same workflow does that.
-          claude_args: '--allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep"'
+      # FRED and CoinGecko sit behind CDNs that sometimes refuse datacenter IPs, and
+      # GitHub runners are datacenter IPs. If that is the problem, this says so in one
+      # line rather than leaving a confusing failure further down.
+      - name: Check the data sources are reachable from this runner
+        run: |
+          {
+            echo "## Connectivity"
+            echo ""
+            echo "| Source | HTTP |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for name in FRED CoinGecko; do
+            case $name in
+              FRED) url="https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=2026-08-01" ;;
+              CoinGecko) url="https://api.coingecko.com/api/v3/global" ;;
+            esac
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$url" || echo "000")
+            echo "| $name | $code |" >> "$GITHUB_STEP_SUMMARY"
+            echo "$name -> $code"
+          done
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build dashboard
         working-directory: macro-dashboard
-        run: python build_macro_dashboard.py --verbose
+        run: |
+          set -o pipefail
+          python build_macro_dashboard.py --verbose 2>&1 | tee build.log
+          {
+            echo "## Build"
+            echo ""
+            echo '```'
+            tail -n 6 build.log
+            echo '```'
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f build.log
 
-      # The "what changed since last refresh" panel works by diffing this run's
-      # snapshot against the previous one, so the snapshots MUST be committed back.
-      # Without this the cloud would think every run was its first and the panel
-      # would never populate.
-      - name: Commit updated dashboard and snapshot
+      # Stage the folder rather than naming paths: "git add a b c" fails ATOMICALLY
+      # when any one pathspec matches nothing, staging none of them. Naming a file
+      # that does not exist yet is how the first version silently committed nothing
+      # on every run while still reporting success.
+      - name: Commit the rebuilt dashboard
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Stage the whole folder rather than naming paths. "git add a b c" fails
-          # ATOMICALLY when any one pathspec matches nothing, staging none of them, and
-          # macro-refresh-status.json only exists after the refresh stage has run. The
-          # first version therefore staged nothing, swallowed the error via "|| true",
-          # and reported "Nothing changed" on every run while the build itself was green.
           git add -A macro-dashboard
+
+          {
+            echo "## Commit"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
           if git diff --staged --quiet; then
-            echo "Nothing changed, nothing to commit."
+            echo "Nothing changed."
+            echo "Nothing to commit: no file differed from the previous run." >> "$GITHUB_STEP_SUMMARY"
           else
-            git commit -m "macro: rebuild dashboard $(date -u '+%Y-%m-%d %H:%M UTC')"
-            # Rebase before pushing: a manual push or the other daily run may have
-            # landed while this job was fetching 39 series.
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            git diff --staged --name-only | sed 's/^/  /'
+            git commit -q -m "macro: rebuild dashboard $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git pull --rebase --autostash -q origin "${GITHUB_REF_NAME}"
+            git push -q origin "HEAD:${GITHUB_REF_NAME}"
+            {
+              echo "Pushed \`$(git rev-parse --short HEAD)\`:"
+              echo ""
+              echo '```'
+              git show --stat --oneline HEAD | tail -n +2
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      # Optional. Publishing needs Pages enabled on the repo, which on a PRIVATE repo
-      # requires a paid GitHub plan. Set a repository variable ENABLE_PAGES=true to
-      # turn this on; leave it unset and the whole block is skipped harmlessly.
-      - name: Prepare Pages artifact
-        if: vars.ENABLE_PAGES == 'true'
-        run: |
-          mkdir -p _site
-          cp macro-dashboard/dashboard.html _site/index.html
-
-      - uses: actions/upload-pages-artifact@v4
-        if: vars.ENABLE_PAGES == 'true'
-        with:
-          path: _site
-
-  deploy:
-    needs: build
-    if: vars.ENABLE_PAGES == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5
