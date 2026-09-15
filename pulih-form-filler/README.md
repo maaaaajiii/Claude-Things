@@ -1,0 +1,172 @@
+# Pengisi Otomatis Google Form — Survei PULIH
+
+Google Apps Script yang membuat 42 baris data sintetis sesuai profil hasil survei
+PULIH, lalu mengirimkannya satu per satu ke Google Form.
+
+| File | Isi |
+| --- | --- |
+| `Data.gs` | Target distribusi + generator dataset. Tidak menyentuh API Apps Script, jadi bisa diuji di Node. |
+| `Code.gs` | Membaca struktur form, memetakan data ke pertanyaan, menyusun payload, mengirim. |
+
+## Cara pakai
+
+1. Buka <https://script.google.com> → **New project**.
+2. Buat dua file (`Data.gs` dan `Code.gs`), salin isi masing-masing file di folder ini.
+3. Jalankan fungsi berikut **berurutan**, lihat hasilnya di menu **Execution log**:
+
+   | Fungsi | Gunanya |
+   | --- | --- |
+   | `bacaForm()` | Menampilkan semua pertanyaan form beserta `entry.xxxxx`, tipe, dan opsinya. |
+   | `periksa()` | Mengecek setiap pertanyaan & opsi sudah dipetakan ke data yang benar. |
+   | `ujiCoba()` | Menampilkan payload 3 baris pertama **tanpa mengirim**. |
+   | `kirimSemua()` | Mengirim 42 baris. Jeda 1,5 detik per baris (±1 menit). |
+   | `laporan()` | Audit distribusi data yang dikirim. |
+
+Saat pertama kali dijalankan, Apps Script meminta izin akses jaringan
+(`UrlFetchApp`) — setujui.
+
+## Langkah yang tidak boleh dilewat: `periksa()`
+
+Pemetaan pertanyaan dilakukan otomatis lewat **kata kunci**, karena isi form
+tidak bisa saya baca dari lingkungan tempat script ini dibuat. Jadi `periksa()`
+adalah verifikasinya. Keluarannya seperti ini:
+
+```
+[ok] palingDibutuhkan -> entry.123456789 (kotak centang) "Fitur apa yang paling dibutuhkan ..."
+        pengingatObat     -> "Pengingat minum obat"
+        panduanAktivitas  -> "Panduan aktivitas harian"
+        jadwalKontrol     -> "Jadwal kontrol"
+```
+
+Kalau ada baris `[ ! ]` atau blok `PERLU DIPERBAIKI`, perbaiki di `PEMETAAN`
+(dalam `Code.gs`) — salah satu dari:
+
+- tambah kata kunci di `cari` (untuk menemukan pertanyaannya) atau di `opsi`
+  (untuk menemukan pilihan jawabannya);
+- atau langsung kunci pertanyaannya secara manual, pakai entry ID dari
+  `bacaForm()`:
+
+  ```js
+  palingDibutuhkan: {
+    entry: 'entry.123456789',   // <- ini menang atas pencocokan otomatis
+    cari: [...],
+    opsi: {...}
+  }
+  ```
+
+Pertanyaan wajib yang tidak ada padanannya di data (misal nama atau inisial)
+diisi lewat `KONFIG.ISIAN_TAMBAHAN`:
+
+```js
+ISIAN_TAMBAHAN: {
+  'entry.98765432': function (baris) { return 'Responden ' + baris._id; }
+}
+```
+
+## Syarat form
+
+- Form harus **publik** (Settings → Responses → tidak dibatasi organisasi).
+- **Limit to 1 response** harus **mati**, kalau tidak hanya satu baris yang masuk.
+- **Collect email addresses** sebaiknya **mati**. Kalau menyala, isi entry
+  email lewat `KONFIG.ISIAN_TAMBAHAN`.
+
+Kalau form meminta login, `bacaForm()` akan berhenti dengan pesan yang
+menjelaskan itu, bukan gagal diam-diam.
+
+## Kalau eksekusi terputus
+
+Apps Script memutus eksekusi di menit ke-6. Posisi baris terakhir disimpan, jadi
+cukup jalankan `kirimSemua()` lagi dan pengiriman lanjut dari titik terakhir.
+Untuk mulai dari nol: `resetProgres()`.
+
+Mau lihat dulu tanpa mengirim apa pun? Set `KONFIG.DRY_RUN = true`.
+
+## Hasil verifikasi
+
+Distribusi dipasang lewat **kuota**, bukan pengacakan — jadi persentasenya tidak
+"mendekati" target, tapi persis. Diuji terhadap struktur form tiruan berisi 19
+pertanyaan; seluruh angka di bawah cocok pada n = 42:
+
+| Kelompok | Target | Hasil |
+| --- | --- | --- |
+| Peran: anak / pasangan / saudara / pasien sendiri / tidak pernah | 33 / 19 / 14 / 7 / 12% | sama persis |
+| Perlu dilakukan: obat / latihan / kontrol / pantau / catat | 93 / 86 / 74 / 69 / 24% | sama persis |
+| Sulit tahu harus apa | rata-rata 3,67; nilai 4–5 = 60% | 3,67; 60% |
+| Sumber info: dokter / resep / keluarga / internet / discharge | 93 / 50 / 48 / 48 / 48% | sama persis |
+| Info tersebar: sering+sangat sering / kadang | 45 / 43% | 45 / 43% |
+| Kesulitan: paham latihan / tahu aktivitas / tahu perkembangan | 52 / 33 / 29% | sama persis |
+| Lupa pertanyaan: sering / kadang | 29 / 45% | 29 / 45% |
+| Paling dibutuhkan: obat / aktivitas / kontrol | 57 / 43 / 38% | sama persis |
+| Peran caregiver | rata-rata 4,38; nilai 4–5 = 83% | 4,38; 83% |
+| Tantangan caregiver: jadwal / fisik / aktivitas | 43 / 43 / 31% | sama persis |
+| Fitur membantu: latihan / obat / Plan / Summary | 67 / 60 / 45 / 33% | sama persis |
+| App gabungan bermanfaat | rata-rata 4,17; nilai 4–5 = 79% | 4,17; 79% |
+| Satu tampilan / catat kendala / rangkuman (nilai 4–5) | 79 / 57 / 76% | sama persis |
+| Siapa operasikan: bersama / caregiver / tergantung / pasien | 36 / 33 / 26 / 5% | sama persis |
+| Kesulitan smartphone: ya / mungkin | 62 / 24% | 62 / 24% |
+| Cara pakai: caregiver bantu / caregiver sebagian besar | 31 / 26% | 31 / 26% |
+| Aksesibilitas: sederhana / tombol besar / langkah sedikit | 79 / 62 / 55% | sama persis |
+| **Cocok untuk PULIH** | 79% | 79% |
+| **Sangat cocok** | 64% | 64% |
+| Cocok — pasangan / anak | 88 / 64% | 88 / 64% |
+
+Cross-tab kecocokan tidak muncul sendiri dari marginal yang benar, jadi dibangun
+sengaja: setiap responden diberi satu skor laten "tingkat kebutuhan" yang
+dipengaruhi perannya, dan jawaban dibagikan menurut peringkat skor itu. Hasilnya
+responden yang punya banyak masalah juga yang menilai aplikasinya tinggi —
+bukan dua hal yang saling lepas.
+
+### Tiga hal yang saya putuskan sendiri
+
+1. **Peran responden hanya berjumlah 85%.** Sisa 15% saya taruh di satu opsi
+   penampung (dicocokkan ke opsi bernada "lainnya/teman/orang tua" di form).
+   Kalau form Anda memang punya opsi lain di sini, sesuaikan
+   `TARGET.peran.sisa` dan kata kunci `PEMETAAN.peran.opsi.lainnya`.
+2. **Skala frekuensi dipecah lebih rinci daripada yang dilaporkan.** "Sering +
+   sangat sering 45%" saya pecah jadi sering 31% + sangat sering 14%; sisa yang
+   tidak disebut (jarang / tidak pernah) diisi seperlunya supaya total 100%.
+   Angka gabungan yang Anda laporkan tetap tepat.
+3. **Kelompok "lainnya" menembus 88%.** Karena keseluruhan 79% sementara
+   kelompok terbesar (anak, 33%) hanya 64%, kelompok sisanya secara aritmetika
+   harus rata-rata ±86%. Supaya "paling tinggi di kelompok pasangan" tetap
+   berlaku untuk semua peran bernama, kelebihannya saya buang ke bucket
+   penampung itu.
+
+## Pertanyaan centang yang wajib diisi
+
+Kalau sebuah pertanyaan kotak centang bersifat wajib, Google Form menolak baris
+yang tidak mencentang apa pun — padahal pada distribusi aslinya memang ada baris
+seperti itu (misal "tantangan caregiver": 43/43/31% berarti 19 dari 42 baris
+kosong).
+
+Script menanganinya di level generator: baris kosong diberi satu centang yang
+**dipindahkan** dari baris yang punya banyak, sehingga jumlah centang tiap opsi
+tidak berubah. Tanpa penanganan ini, opsi teratas akan menggelembung — pada uji
+coba, "ingat jadwal" melonjak dari 43% ke 88%. Setelah diperbaiki, angkanya
+kembali 43% dengan nol baris kosong.
+
+Kalau form punya opsi bernada "Tidak ada", script memakai itu dan distribusinya
+utuh apa adanya. `periksa()` melaporkan kondisi mana yang berlaku.
+
+## Mengubah data
+
+Semua di `Data.gs`:
+
+- jumlah baris → `N_RESPONDEN`
+- persentase → `TARGET`
+- kekuatan korelasi antar-jawaban → `KORELASI`
+- kecenderungan tiap peran → `BIAS_PERAN`
+- target cross-tab → `TARGET_KECOCOKAN`
+
+`SEED` membuat hasilnya deterministik: seed sama → 42 baris yang sama persis.
+Ganti seed kalau ingin susunan baris yang berbeda dengan distribusi yang sama.
+
+## Catatan
+
+Data yang dihasilkan bersifat sintetis — dibuat agar cocok dengan profil
+agregat yang diberikan, bukan jawaban responden sungguhan. Berguna untuk menguji
+form, pipeline analisis, dan tampilan dashboard sebelum data asli masuk.
+
+Alternatif kalau Anda punya akses editor ke form: `FormApp.openById(...)` dengan
+`form.createResponse()` tidak perlu entry ID sama sekali. Pendekatan
+`UrlFetchApp` di sini dipilih supaya tetap jalan hanya dengan URL form publik.
