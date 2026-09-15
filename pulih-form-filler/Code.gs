@@ -141,9 +141,12 @@ var PEMETAAN = {
       anak: ['anak'],
       pasangan: ['pasangan', 'suami', 'istri'],
       saudara: ['saudara', 'kakak', 'adik'],
-      pasienSendiri: ['saya sendiri', 'pasien sendiri', 'saya adalah pasien'],
+      // "mengalami stroke" sengaja dipakai, bukan "pernah" — kata "pernah" juga
+      // muncul di opsi "Tidak pernah mendampingi ...".
+      pasienSendiri: ['mengalami stroke', 'saya sedang', 'saya sendiri',
+                      'pasien sendiri', 'saya adalah pasien'],
       tidakPernah: ['tidak pernah'],
-      lainnya: ['lain', 'teman', 'orang tua', 'kerabat']
+      lainnya: ['kerabat', 'lain', 'teman', 'orang tua']
     }
   },
   tahuHarusApa: {
@@ -194,7 +197,6 @@ var PEMETAAN = {
   lupaPertanyaan: {
     cari: ['lupa', 'pertanyaan', 'kontrol'],
     opsi: {
-      sangatSering: ['sangat sering', 'selalu'],
       sering: ['sering'],
       kadang: ['kadang'],
       jarang: ['jarang'],
@@ -270,8 +272,9 @@ var PEMETAAN = {
     cari: ['keterbatasan', 'cara', 'digunakan', 'bagaimana'],
     opsi: {
       caregiverPenuh: ['sebagian besar', 'sepenuhnya', 'caregiver yang'],
-      caregiverBantu: ['dibantu', 'bantu sebagian', 'bantu'],
-      bergantian: ['bergantian', 'berdua'],
+      caregiverBantu: ['membantu mengoperasikan', 'dibantu', 'bantu'],
+      bersama: ['bersama', 'berdua', 'bergantian'],
+      tergantungKondisi: ['tergantung'],
       pasienMandiri: ['mandiri', 'sendiri']
     }
   },

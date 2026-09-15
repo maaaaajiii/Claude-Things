@@ -47,7 +47,7 @@ var TARGET = {
   // "Sulit tahu harus melakukan apa" — skala 1..5, rata-rata 3,67; 4-5 = 60%.
   sulitTahu: {
     tipe: 'skala',
-    jumlah: { 1: 0, 2: 5, 3: 12, 4: 17, 5: 8 } // mean 154/42 = 3,67
+    jumlah: { 1: 1, 2: 3, 3: 13, 4: 17, 5: 8 } // mean 154/42 = 3,67
   },
 
   // Sumber informasi — centang.
@@ -86,15 +86,16 @@ var TARGET = {
   },
 
   // Lupa pertanyaan saat kontrol — frekuensi, pilihan tunggal.
+  // Form hanya menyediakan 4 tingkat (tanpa "Sangat sering"), jadi 26% yang
+  // tidak dilaporkan dibagi ke "jarang" dan "tidak pernah" saja.
   lupaPertanyaan: {
     tipe: 'pilihan',
     urut: true,
     opsi: [
-      { key: 'sangatSering', pct: 0.05 },
       { key: 'sering',       pct: 0.29 },
       { key: 'kadang',       pct: 0.45 },
-      { key: 'jarang',       pct: 0.17 },
-      { key: 'tidakPernah',  pct: 0.04 }
+      { key: 'jarang',       pct: 0.21 },
+      { key: 'tidakPernah',  pct: 0.05 }
     ]
   },
 
@@ -111,7 +112,7 @@ var TARGET = {
   // Peran caregiver penting — skala 1..5, rata-rata 4,38; 4-5 = 83%.
   peranCaregiver: {
     tipe: 'skala',
-    jumlah: { 1: 0, 2: 2, 3: 5, 4: 10, 5: 25 } // mean 184/42 = 4,38
+    jumlah: { 1: 1, 2: 0, 3: 6, 4: 10, 5: 25 } // mean 184/42 = 4,38
   },
 
   // Tantangan caregiver — centang.
@@ -138,11 +139,11 @@ var TARGET = {
   // Empat pertanyaan minat aplikasi — skala 1..5.
   appGabungan: {
     tipe: 'skala',
-    jumlah: { 1: 0, 2: 4, 3: 5, 4: 13, 5: 20 } // mean 175/42 = 4,17; 4-5 = 79%
+    jumlah: { 1: 1, 2: 2, 3: 6, 4: 13, 5: 20 } // mean 175/42 = 4,17; 4-5 = 79%
   },
   satuTampilan: {
     tipe: 'skala',
-    jumlah: { 1: 0, 2: 3, 3: 6, 4: 14, 5: 19 } // 4-5 = 79%
+    jumlah: { 1: 1, 2: 2, 3: 6, 4: 14, 5: 19 } // 4-5 = 79%
   },
   catatKendala: {
     tipe: 'skala',
@@ -150,7 +151,7 @@ var TARGET = {
   },
   rangkumanKontrol: {
     tipe: 'skala',
-    jumlah: { 1: 0, 2: 3, 3: 7, 4: 14, 5: 18 } // 4-5 = 76%
+    jumlah: { 1: 1, 2: 2, 3: 7, 4: 14, 5: 18 } // 4-5 = 76%
   },
 
   // Siapa yang mengoperasikan aplikasi — pilihan tunggal.
@@ -176,14 +177,18 @@ var TARGET = {
   },
 
   // Cara pakai kalau pasien punya keterbatasan — pilihan tunggal.
+  // Form punya 5 opsi, dua di antaranya yang dilaporkan (31% dan 26%). Sisa 43%
+  // dibagi ke tiga opsi lain; "pasien mengoperasikan sendiri" dibuat paling
+  // kecil karena 62% responden menilai pasien akan kesulitan pakai smartphone.
   caraPakai: {
     tipe: 'pilihan',
-    urut: true,
+    urut: true, // diurutkan dari caregiver paling banyak mengambil alih
     opsi: [
-      { key: 'caregiverPenuh',   pct: 0.26 }, // caregiver pegang sebagian besar
-      { key: 'caregiverBantu',   pct: 0.31 }, // caregiver bantu sebagian
-      { key: 'bergantian',       pct: 0.24 },
-      { key: 'pasienMandiri',    pct: 0.19 }
+      { key: 'caregiverPenuh',     pct: 0.26 }, // caregiver pegang sebagian besar
+      { key: 'caregiverBantu',     pct: 0.31 }, // caregiver bantu mengoperasikan
+      { key: 'bersama',            pct: 0.19 }, // pasien dan caregiver bersama
+      { key: 'tergantungKondisi',  pct: 0.14 },
+      { key: 'pasienMandiri',      pct: 0.10 }
     ]
   },
 

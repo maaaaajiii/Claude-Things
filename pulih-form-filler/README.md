@@ -141,6 +141,36 @@ dipengaruhi perannya, dan jawaban dibagikan menurut peringkat skor itu. Hasilnya
 responden yang punya banyak masalah juga yang menilai aplikasinya tinggi —
 bukan dua hal yang saling lepas.
 
+### Menyesuaikan diri dengan opsi form yang sebenarnya
+
+Tiga tempat di mana opsi form tidak sama dengan yang tersirat di profil hasil
+survei, dan bagaimana ditanganinya:
+
+| Pertanyaan | Kondisi form | Penyesuaian |
+| --- | --- | --- |
+| Lupa pertanyaan saat kontrol | Hanya 4 tingkat, tanpa "Sangat sering" | 26% yang tidak dilaporkan dibagi ke *jarang* (21%) dan *tidak pernah* (5%). Angka yang Anda laporkan — sering 29%, kadang 45% — tetap persis. |
+| Cara pakai bila pasien terbatas | 5 opsi, hanya 2 yang dilaporkan | Sisa 43% dibagi ke *bersama* 19%, *tergantung kondisi* 14%, *pasien mandiri* 10%. Yang terakhir dibuat paling kecil karena 62% menilai pasien akan kesulitan pakai smartphone. |
+| Hubungan dengan pasien | 8 opsi, 5 yang dilaporkan | 15% sisa masuk ke "Kerabat lainnya". Akibatnya **"Orang tua dari pasien stroke" dan "Teman" tidak mendapat satu respons pun.** |
+
+Dua opsi bernilai nol itu keputusan yang bisa Anda balik. Alasannya: keseluruhan
+"cocok" 79% sementara kelompok terbesar (anak, 33%) hanya 64% memaksa
+kelompok-kelompok kecil rata-rata ±86%. Memecah 15% sisa ke tiga opsi membuat
+tiga kelompok mungil yang semuanya harus ±100%, dan itu justru lebih janggal
+daripada dua opsi kosong. Untuk survei stroke, nol "orang tua pasien" juga wajar
+— pasien stroke umumnya sudah lanjut usia.
+
+Kalau Anda lebih suka kedua opsi itu terisi, ubah `TARGET.peran` di `Data.gs`:
+tambahkan `{ key: 'orangTua', pct: 0.05 }` dan `{ key: 'teman', pct: 0.05 }`,
+lalu tambahkan kata kuncinya di `PEMETAAN.peran.opsi`. Cross-tab per peran akan
+sedikit bergeser; `laporan()` menunjukkan akibatnya.
+
+### Nilai 1 pada skala linier
+
+Distribusi awal tidak pernah memakai nilai 1 di lima dari enam skala. Pada n = 42
+itu tanda data buatan yang kentara, jadi tiap skala diberi tepat satu responden
+bernilai 1, dengan menggeser hitungan nilai 2 dan 3 agar rata-rata dan
+persentase 4–5 tidak berubah sama sekali.
+
 ### Tiga hal yang saya putuskan sendiri
 
 1. **Peran responden hanya berjumlah 85%.** Sisa 15% saya taruh di satu opsi
