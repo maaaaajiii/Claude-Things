@@ -54,14 +54,39 @@ Kalau ada baris `[ ! ]` atau blok `PERLU DIPERBAIKI`, perbaiki di `PEMETAAN`
   }
   ```
 
-Pertanyaan wajib yang tidak ada padanannya di data (misal nama atau inisial)
-diisi lewat `KONFIG.ISIAN_TAMBAHAN`:
+## Pertanyaan wajib di luar data survei
+
+Pertanyaan seperti umur atau nama tidak ada di profil hasil survei, jadi tidak
+punya padanan di `TARGET`. `periksa()` dan `kirimSemua()` akan berhenti dan
+menyebutkan pertanyaannya lengkap dengan tipe serta opsinya:
+
+```
+Pertanyaan wajib belum terisi: [entry.1591627387] "Umur Responden"
+  — tipe pilihan ganda, opsi: < 20 tahun | 21-30 tahun | 31-40 tahun | ...
+```
+
+Isinya lewat `KONFIG.ISIAN_TAMBAHAN`, boleh teks tetap atau fungsi
+`(baris, q)` — `baris` adalah data responden itu, `q` pertanyaannya:
 
 ```js
 ISIAN_TAMBAHAN: {
-  'entry.98765432': function (baris) { return 'Responden ' + baris._id; }
+  'entry.98765432': 'Jakarta',                                   // teks tetap
+  'entry.12345678': function (baris) { return 'Responden ' + baris._id; }
 }
 ```
+
+**Umur** (`entry.1591627387`) sudah terisi sebagai contoh. Isian itu menyesuaikan
+diri sendiri: kalau pertanyaannya isian bebas ia mengirim angka (`"38"`), kalau
+pilihan rentang ia mengirim opsi yang mencakup angka itu (`"31-40 tahun"`) lewat
+`cocokkanAngkaKeOpsi()`, yang paham bentuk `21-30`, `< 20`, `> 50`, dan `60+`.
+
+Umurnya ikut peran responden, bukan acak rata — kalau tidak, akan muncul anak
+pasien yang lebih tua daripada pasangan pasien. Rata-rata hasilnya: anak 33
+tahun, saudara 44, lainnya 38, pasangan 58, pasien sendiri 58. Ubah di
+`RENTANG_UMUR` pada `Data.gs`.
+
+Kalau form Anda tidak punya pertanyaan umur, hapus saja baris itu dari
+`ISIAN_TAMBAHAN`.
 
 ## Syarat form
 

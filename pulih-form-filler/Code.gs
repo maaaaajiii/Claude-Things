@@ -24,9 +24,20 @@ var KONFIG = {
   // Kalau true, kirimSemua() hanya mencetak log tanpa benar-benar mengirim.
   DRY_RUN: false,
 
-  // Isian untuk pertanyaan wajib yang tidak ada di spesifikasi data
-  // (misal nama/inisial). Key = entry ID, value = teks atau fungsi(baris).
-  ISIAN_TAMBAHAN: {}
+  // Isian untuk pertanyaan wajib yang tidak ada di spesifikasi data (misal umur
+  // atau nama). Key = entry ID; value = teks tetap, atau fungsi(baris, q) yang
+  // menerima baris dataset dan objek pertanyaannya.
+  ISIAN_TAMBAHAN: {
+
+    // "Umur Responden". Jalan untuk dua bentuk pertanyaan sekaligus:
+    // isian bebas -> mengirim angkanya ("38"); pilihan rentang -> mengirim opsi
+    // yang mencakup angka itu ("31-40 tahun"). Umurnya mengikuti peran
+    // responden, jadi anak pasien tidak muncul lebih tua daripada pasangannya.
+    'entry.1591627387': function (baris, q) {
+      var umur = umurResponden(baris);
+      return (q && q.opsi.length) ? cocokkanAngkaKeOpsi(umur, q.opsi) : String(umur);
+    }
+  }
 };
 
 function urlForm(jenis) {
@@ -390,8 +401,10 @@ function petakan(struktur) {
   pertanyaan.forEach(function (q) {
     if (!q.wajib || qTerpakai[q.entryId]) return;
     if (KONFIG.ISIAN_TAMBAHAN['entry.' + q.entryId] != null) return;
-    masalah.push('Pertanyaan wajib belum terisi: [entry.' + q.entryId + '] ' + q.judul +
-                 ' — tambahkan ke KONFIG.ISIAN_TAMBAHAN.');
+    masalah.push('Pertanyaan wajib belum terisi: [entry.' + q.entryId + '] "' + q.judul +
+                 '" — tipe ' + q.namaTipe +
+                 (q.opsi.length ? ', opsi: ' + q.opsi.join(' | ') : ', isian bebas') +
+                 '. Tambahkan ke KONFIG.ISIAN_TAMBAHAN.');
   });
 
   return { peta: peta, masalah: masalah };
@@ -515,6 +528,48 @@ function datasetUntuk(peta) {
  * 3. Menyusun payload
  * ------------------------------------------------------------------ */
 
+/**
+ * Cocokkan sebuah angka ke opsi berbentuk rentang, misalnya "31-40 tahun",
+ * "< 30", "> 60 tahun", atau "60+". Dipakai untuk isian seperti umur, yang di
+ * satu form bisa berupa isian bebas dan di form lain berupa pilihan rentang.
+ *
+ * @param {number} angka nilai yang dicari
+ * @param {Array<string>} opsi daftar opsi apa adanya dari form
+ * @return {string} teks opsi yang cocok; kalau tidak ada yang cocok, opsi
+ *         dengan angka terdekat
+ */
+function cocokkanAngkaKeOpsi(angka, opsi) {
+  var terdekat = null, jarakTerdekat = Infinity;
+
+  for (var i = 0; i < opsi.length; i++) {
+    var teks = String(opsi[i]);
+    var angkaOpsi = (teks.match(/\d+/g) || []).map(Number);
+    if (!angkaOpsi.length) continue;
+
+    var n = normalkan(teks);
+    var keBawah = /(^|\s)(kurang|bawah|maks|maksimal)(\s|$)/.test(n) || teks.indexOf('<') !== -1;
+    var keAtas = /(^|\s)(lebih|atas|min|minimal)(\s|$)/.test(n) || teks.indexOf('>') !== -1 ||
+                 /\d\s*\+/.test(teks);
+
+    if (angkaOpsi.length >= 2) {
+      var a = Math.min(angkaOpsi[0], angkaOpsi[1]);
+      var b = Math.max(angkaOpsi[0], angkaOpsi[1]);
+      if (angka >= a && angka <= b) return teks;
+      var jarak = angka < a ? a - angka : angka - b;
+      if (jarak < jarakTerdekat) { jarakTerdekat = jarak; terdekat = teks; }
+    } else {
+      var v = angkaOpsi[0];
+      if (keBawah && angka <= v) return teks;
+      if (keAtas && angka >= v) return teks;
+      if (!keBawah && !keAtas && angka === v) return teks;
+      var j2 = Math.abs(angka - v);
+      if (j2 < jarakTerdekat) { jarakTerdekat = j2; terdekat = teks; }
+    }
+  }
+
+  return terdekat || opsi[0];
+}
+
 /** Ubah nilai skala 1..5 menjadi salah satu opsi skala milik form. */
 function nilaiSkala(nilai, q) {
   if (!q.opsi.length) return String(nilai);
@@ -563,8 +618,15 @@ function bangunPayload(baris, peta, struktur) {
 
   Object.keys(KONFIG.ISIAN_TAMBAHAN).forEach(function (entryKey) {
     var v = KONFIG.ISIAN_TAMBAHAN[entryKey];
-    tambah(String(entryKey).replace(/^entry\./, ''),
-           typeof v === 'function' ? v(baris) : v);
+    var id = String(entryKey).replace(/^entry\./, '');
+    // Pertanyaannya ikut dikirim ke fungsi, supaya isian bisa menyesuaikan diri
+    // dengan tipe dan daftar opsinya (lihat contoh umur di KONFIG).
+    var q = null;
+    for (var i = 0; i < struktur.pertanyaan.length; i++) {
+      if (String(struktur.pertanyaan[i].entryId) === id) { q = struktur.pertanyaan[i]; break; }
+    }
+    var nilai = typeof v === 'function' ? v(baris, q) : v;
+    if (nilai != null && nilai !== '') tambah(id, nilai);
   });
 
   var halaman = [];

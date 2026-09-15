@@ -587,8 +587,40 @@ function setelSangatCocok(baris, target, rng) {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * Isian tambahan
+ * ------------------------------------------------------------------ */
+
+/** Rentang umur yang masuk akal untuk tiap peran responden. */
+var RENTANG_UMUR = {
+  anak:          [24, 43],
+  pasangan:      [46, 68],
+  saudara:       [31, 56],
+  pasienSendiri: [42, 70],
+  tidakPernah:   [22, 46],
+  lainnya:       [26, 52]
+};
+
+/**
+ * Umur responden, menyesuaikan perannya — anak pasien jauh lebih muda daripada
+ * pasangan pasien, jadi umur acak tanpa memandang peran akan terlihat janggal.
+ *
+ * Deterministik: baris yang sama selalu menghasilkan umur yang sama.
+ *
+ * @param {Object} baris satu baris dataset
+ * @return {number} umur dalam tahun
+ */
+function umurResponden(baris) {
+  var r = RENTANG_UMUR[baris.peran] || [25, 55];
+  var rng = buatRng(SEED + baris._id * 7919);
+  // rata-rata dua angka acak: hasilnya menumpuk di tengah rentang, bukan rata.
+  var posisi = (rng() + rng()) / 2;
+  return r[0] + Math.round(posisi * (r[1] - r[0]));
+}
+
 if (typeof module !== 'undefined') {
   module.exports = {
+    RENTANG_UMUR: RENTANG_UMUR, umurResponden: umurResponden,
     N_RESPONDEN: N_RESPONDEN, SEED: SEED, TARGET: TARGET,
     TARGET_KECOCOKAN: TARGET_KECOCOKAN, bangunDataset: bangunDataset,
     hitungMasalah: hitungMasalah, hitungMinat: hitungMinat,
