@@ -746,9 +746,10 @@ function resetProgres() {
 function laporan() {
   // Audit memakai dataset yang sama persis dengan yang dikirim, termasuk
   // penyesuaian untuk pertanyaan centang wajib.
-  var data, catatan = '';
+  var data, catatan = '', struktur = null;
   try {
-    var hasil = petakan(ambilStrukturForm());
+    struktur = ambilStrukturForm();
+    var hasil = petakan(struktur);
     data = datasetUntuk(hasil.peta);
   } catch (e) {
     data = bangunDataset(N_RESPONDEN, SEED);
@@ -784,6 +785,29 @@ function laporan() {
       }).join(', '));
     }
   });
+
+  // Isian tambahan (umur, dsb.) tidak ada di TARGET, jadi kalau tidak dicetak
+  // di sini ia lolos dari audit sama sekali.
+  if (struktur) {
+    Object.keys(KONFIG.ISIAN_TAMBAHAN).forEach(function (entryKey) {
+      var id = String(entryKey).replace(/^entry\./, '');
+      var q = null;
+      for (var i = 0; i < struktur.pertanyaan.length; i++) {
+        if (String(struktur.pertanyaan[i].entryId) === id) { q = struktur.pertanyaan[i]; break; }
+      }
+      var v = KONFIG.ISIAN_TAMBAHAN[entryKey];
+      var hitung = {};
+      data.forEach(function (r) {
+        var nilai = typeof v === 'function' ? v(r, q) : v;
+        hitung[nilai] = (hitung[nilai] || 0) + 1;
+      });
+      // Opsi diurutkan seperti di form supaya yang bernilai nol ikut terlihat.
+      var urut = (q && q.opsi.length) ? q.opsi : Object.keys(hitung).sort();
+      baris.push((q ? q.judul : entryKey) + ': ' + urut.map(function (o) {
+        return o + ' ' + persen(hitung[o] || 0);
+      }).join(', '));
+    });
+  }
 
   var cocok = data.filter(isCocok).length;
   var sangat = data.filter(isSangatCocok).length;

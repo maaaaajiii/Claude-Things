@@ -80,10 +80,17 @@ diri sendiri: kalau pertanyaannya isian bebas ia mengirim angka (`"38"`), kalau
 pilihan rentang ia mengirim opsi yang mencakup angka itu (`"31-40 tahun"`) lewat
 `cocokkanAngkaKeOpsi()`, yang paham bentuk `21-30`, `< 20`, `> 50`, dan `60+`.
 
-Umurnya ikut peran responden, bukan acak rata — kalau tidak, akan muncul anak
-pasien yang lebih tua daripada pasangan pasien. Rata-rata hasilnya: anak 33
-tahun, saudara 44, lainnya 38, pasangan 58, pasien sendiri 58. Ubah di
-`RENTANG_UMUR` pada `Data.gs`.
+Umurnya ikut peran responden, bukan acak rata — kalau acak rata akan muncul anak
+pasien berumur 70 mendampingi orang tuanya. Diatur di `PROFIL_UMUR` (`Data.gs`)
+sebagai umur khas + sebaran + batas wajar per peran: anak ±36 tahun, saudara
+±45, pasangan ±56, pasien sendiri ±57.
+
+Rentangnya sengaja **saling tumpang tindih**. Versi pertama mengurung tiap peran
+di rentang terpisah (anak 24–43, pasangan 46–68), dan hasilnya pada tabel silang
+umur × peran tidak ada satu pun anak pasien yang lebih tua daripada pasangan
+pasien — kerapian yang tidak pernah muncul di data survei asli. Sekarang anak
+pasien bisa berumur 50-an dan pasangan bisa 40-an, sementara rata-rata tiap
+kelompok tetap berbeda jelas.
 
 Kalau form Anda tidak punya pertanyaan umur, hapus saja baris itu dari
 `ISIAN_TAMBAHAN`.

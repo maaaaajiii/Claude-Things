@@ -596,19 +596,27 @@ function setelSangatCocok(baris, target, rng) {
  * Isian tambahan
  * ------------------------------------------------------------------ */
 
-/** Rentang umur yang masuk akal untuk tiap peran responden. */
-var RENTANG_UMUR = {
-  anak:          [24, 43],
-  pasangan:      [46, 68],
-  saudara:       [31, 56],
-  pasienSendiri: [42, 70],
-  tidakPernah:   [22, 46],
-  lainnya:       [26, 52]
+/**
+ * Profil umur tiap peran: umur khas (`tengah`), sebarannya (`sebar`), dan batas
+ * wajar (`min`/`maks`).
+ *
+ * Rentangnya sengaja saling tumpang tindih. Kalau tiap peran dikurung di
+ * rentang terpisah — anak 24-43, pasangan 46-68 — maka pada tabel silang umur
+ * dan peran tidak akan pernah ada satu pun anak pasien yang lebih tua daripada
+ * pasangan pasien. Kerapian seperti itu tidak muncul pada data survei asli.
+ */
+var PROFIL_UMUR = {
+  anak:          { tengah: 36, sebar: 8,  min: 22, maks: 58 },
+  pasangan:      { tengah: 56, sebar: 9,  min: 35, maks: 75 },
+  saudara:       { tengah: 45, sebar: 9,  min: 27, maks: 65 },
+  pasienSendiri: { tengah: 57, sebar: 10, min: 35, maks: 78 },
+  tidakPernah:   { tengah: 33, sebar: 9,  min: 20, maks: 55 },
+  lainnya:       { tengah: 40, sebar: 10, min: 23, maks: 62 }
 };
 
 /**
- * Umur responden, menyesuaikan perannya — anak pasien jauh lebih muda daripada
- * pasangan pasien, jadi umur acak tanpa memandang peran akan terlihat janggal.
+ * Umur responden, menyesuaikan perannya — anak pasien umumnya jauh lebih muda
+ * daripada pasangan pasien, jadi umur acak tanpa memandang peran akan janggal.
  *
  * Deterministik: baris yang sama selalu menghasilkan umur yang sama.
  *
@@ -616,16 +624,15 @@ var RENTANG_UMUR = {
  * @return {number} umur dalam tahun
  */
 function umurResponden(baris) {
-  var r = RENTANG_UMUR[baris.peran] || [25, 55];
+  var p = PROFIL_UMUR[baris.peran] || { tengah: 40, sebar: 10, min: 22, maks: 65 };
   var rng = buatRng(SEED + baris._id * 7919);
-  // rata-rata dua angka acak: hasilnya menumpuk di tengah rentang, bukan rata.
-  var posisi = (rng() + rng()) / 2;
-  return r[0] + Math.round(posisi * (r[1] - r[0]));
+  var umur = Math.round(p.tengah + p.sebar * gauss(rng));
+  return Math.max(p.min, Math.min(p.maks, umur));
 }
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    RENTANG_UMUR: RENTANG_UMUR, umurResponden: umurResponden,
+    PROFIL_UMUR: PROFIL_UMUR, umurResponden: umurResponden,
     N_RESPONDEN: N_RESPONDEN, SEED: SEED, TARGET: TARGET,
     TARGET_KECOCOKAN: TARGET_KECOCOKAN, bangunDataset: bangunDataset,
     hitungMasalah: hitungMasalah, hitungMinat: hitungMinat,
