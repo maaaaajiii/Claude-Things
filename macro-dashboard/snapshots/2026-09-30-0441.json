@@ -1,0 +1,209 @@
+{
+  "pulled_at": "2026-09-30 04:41",
+  "latest_prints": {
+    "DFEDTARU": {
+      "date": "2026-09-29",
+      "value": 4.0
+    },
+    "EFFR": {
+      "date": "2026-09-28",
+      "value": 3.88
+    },
+    "DGS3MO": {
+      "date": "2026-09-28",
+      "value": 4.28
+    },
+    "DGS2": {
+      "date": "2026-09-28",
+      "value": 4.92
+    },
+    "DGS5": {
+      "date": "2026-09-28",
+      "value": 5.06
+    },
+    "DGS10": {
+      "date": "2026-09-28",
+      "value": 5.24
+    },
+    "DGS30": {
+      "date": "2026-09-28",
+      "value": 5.56
+    },
+    "DFII10": {
+      "date": "2026-09-28",
+      "value": 2.9
+    },
+    "DFII5": {
+      "date": "2026-09-28",
+      "value": 2.73
+    },
+    "T10YIE": {
+      "date": "2026-09-29",
+      "value": 2.35
+    },
+    "T5YIE": {
+      "date": "2026-09-29",
+      "value": 2.34
+    },
+    "T5YIFR": {
+      "date": "2026-09-29",
+      "value": 2.36
+    },
+    "THREEFYTP10": {
+      "date": "2026-09-25",
+      "value": 1.0203
+    },
+    "CPIAUCSL": {
+      "date": "2026-08-01",
+      "value": 3.35302
+    },
+    "CPILFESL": {
+      "date": "2026-08-01",
+      "value": 2.44616
+    },
+    "PCEPI": {
+      "date": "2026-07-01",
+      "value": 3.70117
+    },
+    "PCEPILFE": {
+      "date": "2026-07-01",
+      "value": 3.34414
+    },
+    "CPIENGSL": {
+      "date": "2026-08-01",
+      "value": 16.04935
+    },
+    "CPIUFDSL": {
+      "date": "2026-08-01",
+      "value": 2.6336
+    },
+    "CUSR0000SAH1": {
+      "date": "2026-08-01",
+      "value": 3.03481
+    },
+    "CUSR0000SASLE": {
+      "date": "2026-08-01",
+      "value": 3.01647
+    },
+    "CUSR0000SACL1E": {
+      "date": "2026-08-01",
+      "value": 0.65992
+    },
+    "CPIMEDSL": {
+      "date": "2026-08-01",
+      "value": 1.56301
+    },
+    "UNRATE": {
+      "date": "2026-08-01",
+      "value": 4.1
+    },
+    "PAYEMS": {
+      "date": "2026-08-01",
+      "value": 159075.0
+    },
+    "ICSA": {
+      "date": "2026-09-19",
+      "value": 197000.0
+    },
+    "CES0500000003": {
+      "date": "2026-08-01",
+      "value": 3.08575
+    },
+    "SAHMREALTIME": {
+      "date": "2026-08-01",
+      "value": -0.07
+    },
+    "A191RL1Q225SBEA": {
+      "date": "2026-04-01",
+      "value": 1.5
+    },
+    "DCOILBRENTEU": {
+      "date": "2026-09-22",
+      "value": 114.89
+    },
+    "DCOILWTICO": {
+      "date": "2026-09-22",
+      "value": 96.41
+    },
+    "DTWEXBGS": {
+      "date": "2026-09-25",
+      "value": 120.33
+    },
+    "BAMLH0A0HYM2": {
+      "date": "2026-09-28",
+      "value": 3.02
+    },
+    "VIXCLS": {
+      "date": "2026-09-28",
+      "value": 16.07
+    },
+    "WALCL": {
+      "date": "2026-09-23",
+      "value": 6747704.0
+    },
+    "WTREGEN": {
+      "date": "2026-09-23",
+      "value": 977084.0
+    },
+    "RRPONTSYD": {
+      "date": "2026-09-29",
+      "value": 11.446
+    },
+    "SP500": {
+      "date": "2026-09-29",
+      "value": 7670.84
+    },
+    "NASDAQCOM": {
+      "date": "2026-09-29",
+      "value": 26797.54
+    }
+  },
+  "derived": {
+    "2s10s": 32.00000000000003,
+    "2s10s_asof": "2026-09-28",
+    "5s30s": 50.0,
+    "5s30s_asof": "2026-09-28",
+    "3m10y": 96.0,
+    "3m10y_asof": "2026-09-28",
+    "d2_20": 58.00000000000001,
+    "d10_20": 50.99999999999998,
+    "d30_20": 33.999999999999986,
+    "2s10s_chg20": -7.000000000000028,
+    "level_chg20": 54.49999999999999,
+    "net_liquidity": 5.759174,
+    "net_liquidity_asof": "2026-09-23",
+    "net_liquidity_chg": -0.1094949999999999,
+    "stock_bond_corr": -0.6935557049659343,
+    "sahm": -0.07,
+    "sahm_gap": 0.5700000000000001,
+    "payems_chg": 162.0,
+    "payems_asof": "2026-08-01",
+    "real_policy_rate": 0.6558600000000001,
+    "core_gap": 0.89798
+  },
+  "regime": {
+    "driver": "rates",
+    "driver_note": "Saham dan yield bergerak BERLAWANAN. Pasar sedang dikendarai discount rate: tiap kenaikan yield langsung menekan aset beresiko. Ini rezim inflasi.",
+    "corr": -0.6935557049659343,
+    "labor": "inflation",
+    "labor_note": "Sahm Rule di -0.07, masih jauh di bawah ambang resesi 0,50. Artinya kita di rezim GOOD NEWS IS BAD NEWS: data tenaga kerja yang kuat berarti Fed tidak perlu melunak, dan itu jelek untuk aset beresiko. Data tenaga kerja yang lemah justru dibaca positif.",
+    "credit": "watch",
+    "credit_note": "Spread kredit mulai bergerak. Layak diawasi.",
+    "oas": 3.02
+  },
+  "coingecko": {
+    "total_mcap": 2864764379944.633,
+    "usdt_mcap": 183798847048,
+    "usdc_mcap": 74379932268,
+    "stable_total": 258178779316,
+    "usdt_dominance": 6.415845168095544,
+    "stable_dominance": 9.012216890276672,
+    "btc_dominance": 58.28085034759118,
+    "btc_price": 83314,
+    "btc_chg24h": 0.20514,
+    "eth_price": 2671.56,
+    "eth_chg24h": 0.2043,
+    "as_of": "2026-09-30"
+  },
+  "errors": {}
+}
