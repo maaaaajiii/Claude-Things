@@ -1,0 +1,209 @@
+{
+  "pulled_at": "2026-10-23 03:55",
+  "latest_prints": {
+    "DFEDTARU": {
+      "date": "2026-10-22",
+      "value": 4.0
+    },
+    "EFFR": {
+      "date": "2026-10-21",
+      "value": 3.88
+    },
+    "DGS3MO": {
+      "date": "2026-10-21",
+      "value": 4.25
+    },
+    "DGS2": {
+      "date": "2026-10-21",
+      "value": 4.81
+    },
+    "DGS5": {
+      "date": "2026-10-21",
+      "value": 4.95
+    },
+    "DGS10": {
+      "date": "2026-10-21",
+      "value": 5.13
+    },
+    "DGS30": {
+      "date": "2026-10-21",
+      "value": 5.42
+    },
+    "DFII10": {
+      "date": "2026-10-21",
+      "value": 2.76
+    },
+    "DFII5": {
+      "date": "2026-10-21",
+      "value": 2.55
+    },
+    "T10YIE": {
+      "date": "2026-10-22",
+      "value": 2.32
+    },
+    "T5YIE": {
+      "date": "2026-10-22",
+      "value": 2.45
+    },
+    "T5YIFR": {
+      "date": "2026-10-22",
+      "value": 2.19
+    },
+    "THREEFYTP10": {
+      "date": "2026-10-16",
+      "value": 0.9857
+    },
+    "CPIAUCSL": {
+      "date": "2026-09-01",
+      "value": 3.71725
+    },
+    "CPILFESL": {
+      "date": "2026-09-01",
+      "value": 2.56584
+    },
+    "PCEPI": {
+      "date": "2026-08-01",
+      "value": 3.41903
+    },
+    "PCEPILFE": {
+      "date": "2026-08-01",
+      "value": 3.0076
+    },
+    "CPIENGSL": {
+      "date": "2026-09-01",
+      "value": 20.35411
+    },
+    "CPIUFDSL": {
+      "date": "2026-09-01",
+      "value": 2.45289
+    },
+    "CUSR0000SAH1": {
+      "date": "2026-09-01",
+      "value": 3.22306
+    },
+    "CUSR0000SASLE": {
+      "date": "2026-09-01",
+      "value": 3.15566
+    },
+    "CUSR0000SACL1E": {
+      "date": "2026-09-01",
+      "value": 0.71245
+    },
+    "CPIMEDSL": {
+      "date": "2026-09-01",
+      "value": 1.50358
+    },
+    "UNRATE": {
+      "date": "2026-09-01",
+      "value": 4.2
+    },
+    "PAYEMS": {
+      "date": "2026-09-01",
+      "value": 159044.0
+    },
+    "ICSA": {
+      "date": "2026-10-17",
+      "value": 194000.0
+    },
+    "CES0500000003": {
+      "date": "2026-09-01",
+      "value": 3.02452
+    },
+    "SAHMREALTIME": {
+      "date": "2026-09-01",
+      "value": 0.0
+    },
+    "A191RL1Q225SBEA": {
+      "date": "2026-04-01",
+      "value": 2.2
+    },
+    "DCOILBRENTEU": {
+      "date": "2026-10-20",
+      "value": 115.22
+    },
+    "DCOILWTICO": {
+      "date": "2026-10-20",
+      "value": 107.89
+    },
+    "DTWEXBGS": {
+      "date": "2026-10-16",
+      "value": 121.4048
+    },
+    "BAMLH0A0HYM2": {
+      "date": "2026-10-21",
+      "value": 3.27
+    },
+    "VIXCLS": {
+      "date": "2026-10-21",
+      "value": 16.68
+    },
+    "WALCL": {
+      "date": "2026-10-21",
+      "value": 6753604.0
+    },
+    "WTREGEN": {
+      "date": "2026-10-21",
+      "value": 952002.0
+    },
+    "RRPONTSYD": {
+      "date": "2026-10-22",
+      "value": 0.351
+    },
+    "SP500": {
+      "date": "2026-10-21",
+      "value": 7757.17
+    },
+    "NASDAQCOM": {
+      "date": "2026-10-22",
+      "value": 26008.86
+    }
+  },
+  "derived": {
+    "2s10s": 32.00000000000003,
+    "2s10s_asof": "2026-10-21",
+    "5s30s": 46.99999999999997,
+    "5s30s_asof": "2026-10-21",
+    "3m10y": 87.99999999999999,
+    "3m10y_asof": "2026-10-21",
+    "d2_20": 9.999999999999964,
+    "d10_20": 16.999999999999993,
+    "d30_20": 12.99999999999999,
+    "2s10s_chg20": 7.000000000000028,
+    "level_chg20": 13.499999999999979,
+    "net_liquidity": 5.801251,
+    "net_liquidity_asof": "2026-10-21",
+    "net_liquidity_chg": -0.07077800000000067,
+    "stock_bond_corr": -0.1666448883088784,
+    "sahm": 0.0,
+    "sahm_gap": 0.5,
+    "payems_chg": 29.0,
+    "payems_asof": "2026-09-01",
+    "real_policy_rate": 0.9924,
+    "core_gap": 0.44175999999999993
+  },
+  "regime": {
+    "driver": "mixed",
+    "driver_note": "Korelasi saham-obligasi lemah. Tidak ada satu penggerak yang dominan saat ini, jadi jangan paksakan satu cerita.",
+    "corr": -0.1666448883088784,
+    "labor": "inflation",
+    "labor_note": "Sahm Rule di +0.00, masih jauh di bawah ambang resesi 0,50. Artinya kita di rezim GOOD NEWS IS BAD NEWS: data tenaga kerja yang kuat berarti Fed tidak perlu melunak, dan itu jelek untuk aset beresiko. Data tenaga kerja yang lemah justru dibaca positif.",
+    "credit": "watch",
+    "credit_note": "Spread kredit mulai bergerak. Layak diawasi.",
+    "oas": 3.27
+  },
+  "coingecko": {
+    "total_mcap": 2760811825656.1187,
+    "usdt_mcap": 182504128155,
+    "usdc_mcap": 72073236054,
+    "stable_total": 254577364209,
+    "usdt_dominance": 6.610523993667229,
+    "stable_dominance": 9.22110525039129,
+    "btc_dominance": 59.472459551686455,
+    "btc_price": 81904,
+    "btc_chg24h": -1.06348,
+    "eth_price": 2411.34,
+    "eth_chg24h": -1.1724,
+    "as_of": "2026-10-23"
+  },
+  "errors": {}
+}
